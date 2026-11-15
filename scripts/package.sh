@@ -4,6 +4,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 version=$(sed -n 's/.*MARKETING_VERSION = \(.*\);/\1/p' LocalImage.xcodeproj/project.pbxproj | head -1)
+# Bytecode caches inside the synchronized source folder would be copied into the app's Resources.
+find LocalImage -name __pycache__ -type d -prune -exec rm -rf {} +
+
 derived=build/ReleaseDerived
 rm -rf "$derived" dist
 mkdir -p dist

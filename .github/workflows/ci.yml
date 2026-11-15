@@ -16,7 +16,7 @@ jobs:
       - name: Xcode
         run: xcodebuild -version
       - name: Worker syntax
-        run: python3 -m py_compile LocalImage/Engine/lix_worker.py
+        run: python3 -c "import ast,sys; ast.parse(open(sys.argv[1]).read())" LocalImage/Engine/lix_worker.py
       - name: Build
         run: >
           xcodebuild -project LocalImage.xcodeproj -scheme LocalImage -configuration Debug
