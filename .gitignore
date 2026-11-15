@@ -1,0 +1,18 @@
+# Build output
+build/
+dist/
+DerivedData/
+
+# Xcode user state
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# macOS
+.DS_Store
+
+# Local material that is not part of the source
+Promo/
+Samples/
+CLAUDE.md
+__pycache__/

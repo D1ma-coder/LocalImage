@@ -1,0 +1,15 @@
+# Changelog
+
+## 1.0.0 — 2026-11-15
+
+- Native SwiftUI app for macOS 26+ on Apple Silicon with Liquid Glass; generation runs locally on mflux 0.24.0 / MLX in an isolated uv environment that the app installs itself.
+- Studio: prompt, model switcher in the toolbar, format, quality, steps, count, seed, negative prompt for models that use it, and img2img with source influence.
+- Live preview of every step as an x̂₀ estimate under a blur and loader; all slots of a batch are created up front; instant stop.
+- Phase-aware remaining-time estimate that keeps counting between steps and learns load, step and decode times for each model on this Mac; img2img counts only the steps that actually run.
+- Model catalog of open models with ready MLX builds; descriptions, licenses and statistics are loaded from Hugging Face.
+- Hugging Face search with format, architecture, bit-width, compatibility and gated filters, author avatars and explained badges.
+- Original weights with separate quantization of the text/VL encoder and the diffusion model, with combinations suggested for the memory of this Mac.
+- Resumable sequential downloads over HTTP Range that continue after restarts.
+- Memory estimate from Metal's working-set limit, float16 on M1/M2, automatic low-memory mode; works on 16 GB.
+- Gallery with search, repeat with the same or a new seed, and `.lix.json` metadata next to every image.
+- Hugging Face token in Settings, checked as you type and stored in a file with mode 600.

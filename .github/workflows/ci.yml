@@ -1,0 +1,23 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v6
+      - name: Xcode
+        run: xcodebuild -version
+      - name: Worker syntax
+        run: python3 -m py_compile LocalImage/Engine/lix_worker.py
+      - name: Build
+        run: >
+          xcodebuild -project LocalImage.xcodeproj -scheme LocalImage -configuration Debug
+          -derivedDataPath build/DerivedData ARCHS=arm64 CODE_SIGNING_ALLOWED=NO build

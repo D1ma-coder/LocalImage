@@ -1,0 +1,49 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v6
+      - run: xcodebuild -version
+      - run: python3 -m py_compile LocalImage/Engine/lix_worker.py
+      - run: scripts/package.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-arm64
+          path: dist/*.zip
+          if-no-files-found: error
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+      - name: Publish the tested build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          version=$(sed -n 's/.*MARKETING_VERSION = \(.*\);/\1/p' LocalImage.xcodeproj/project.pbxproj | head -1)
+          tag="v$version"
+          if [[ "$GITHUB_REF_TYPE" == tag && "$GITHUB_REF_NAME" != "$tag" ]]; then
+            echo 'Tag and MARKETING_VERSION differ'; exit 1
+          fi
+          cp docs/RELEASE_NOTES.md release-notes.md
+          printf '\n### SHA-256\n\n```text\n' >> release-notes.md
+          (cd release-assets && sha256sum *) >> release-notes.md
+          printf '```\n' >> release-notes.md
+          gh release create "$tag" release-assets/* --target "$GITHUB_SHA" --title "LocalImage $tag — local image generation for macOS" --notes-file release-notes.md --latest
