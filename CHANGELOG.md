@@ -9,6 +9,7 @@
 - Several attached images: FLUX.2 klein (up to 4), FLUX 3 klein and Qwen-Image 2.1 (up to 10) edit from reference images; other img2img models take one. The attachment no longer has a caption, and images a newly picked model can't use are removed.
 - Installed models show the expected time of a standard image (1 MP, default steps) instead of seconds per step, from separately measured load, step and decode times.
 - Removed the "Original + your own quantization" option: models are downloaded only as ready MLX builds, and Hugging Face search lists MLX builds (and catalog models). Models quantized earlier keep working.
+- Settings → Load: limit the GPU load from 30% to 100% (the engine pauses after each step; applies to a running generation too, and time estimates account for it), and an option to lower the engine's CPU priority. The stored step speed excludes these pauses.
 
 ## 1.1.0 — 2026-11-16
 

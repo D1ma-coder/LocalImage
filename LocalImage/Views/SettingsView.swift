@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum SettingsTab: String { case generation, huggingFace, folders, engine }
+enum SettingsTab: String { case generation, load, huggingFace, folders, engine }
 
 extension Notification.Name {
     /// Posted when the Hugging Face token is saved or removed.
@@ -13,6 +13,7 @@ struct SettingsView: View {
     var body: some View {
         TabView(selection: $tab) {
             GenerationSettingsTab().tabItem { Label("Генерация", systemImage: "slider.horizontal.3") }.tag(SettingsTab.generation)
+            LoadSettings().tabItem { Label("Нагрузка", systemImage: "gauge.with.dots.needle.67percent") }.tag(SettingsTab.load)
             AccountSettings().tabItem { Label("Hugging Face", systemImage: "key") }.tag(SettingsTab.huggingFace)
             StorageSettings().tabItem { Label("Папки", systemImage: "folder") }.tag(SettingsTab.folders)
             EngineSettings().tabItem { Label("Движок", systemImage: "cpu") }.tag(SettingsTab.engine)
@@ -42,6 +43,58 @@ private struct GenerationSettingsTab: View {
         }
         .formStyle(.grouped)
         .sheet(isPresented: $showLog) { LogView(lines: studio.log) }
+    }
+}
+
+private struct LoadSettings: View {
+    @AppStorage(HardwareLoad.percentKey) private var percent = 100
+    @AppStorage(HardwareLoad.lowPriorityKey) private var lowPriority = false
+
+    var body: some View {
+        Form {
+            SwiftUI.Section {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("Видеочип")
+                        Spacer()
+                        Text(percent >= 100 ? String(localized: "Без ограничений") : "\(percent)%")
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                    Slider(value: Binding(get: { Double(percent) }, set: { percent = Int($0.rounded()) }),
+                           in: Double(HardwareLoad.range.lowerBound)...Double(HardwareLoad.range.upperBound), step: 10) {
+                        EmptyView()
+                    } minimumValueLabel: {
+                        Image(systemName: "tortoise").help(Text("Тише и прохладнее"))
+                    } maximumValueLabel: {
+                        Image(systemName: "hare").help(Text("Быстрее"))
+                    }
+                    .labelsHidden()
+                    Text(summary)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Toggle(isOn: $lowPriority) {
+                    LabelWithInfo("Уступать процессор другим приложениям", info: "Движок работает с пониженным приоритетом: загрузка модели, обработка промпта и сохранение не мешают остальным программам. Расчёт на видеочипе это не замедляет. Применяется со следующей генерации.")
+                }
+            } header: {
+                HStack(spacing: 5) {
+                    Text("Нагрузка на Mac")
+                    InfoButton("Ограничивает, насколько сильно генерация загружает видеочип. После каждого шага движок делает паузу, так что видеочип работает только заданную долю времени: Mac меньше греется, вентиляторы тише, а остальные программы и видео идут плавнее. Генерация при этом идёт дольше — например, при 50% примерно вдвое.\n\nМеняется сразу, в том числе во время идущей генерации. Оценки времени учитывают это ограничение.")
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .onChange(of: percent) { HardwareLoad.publish() }
+    }
+
+    private var summary: String {
+        guard percent < 100 else {
+            return String(localized: "Генерация использует видеочип полностью — максимальная скорость.")
+        }
+        let slower = String(format: "%.1f", 100 / Double(percent))
+        return String(localized: "Видеочип занят \(percent)% времени, генерация идёт примерно в \(slower) раза дольше.")
     }
 }
 

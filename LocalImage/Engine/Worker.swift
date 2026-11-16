@@ -4,7 +4,7 @@ import Foundation
 nonisolated enum WorkerEvent {
     case phase(String)
     case denoise(start: Int, total: Int, width: Int, height: Int)
-    case step(step: Int, total: Int, elapsed: Double)
+    case step(step: Int, total: Int, elapsed: Double, paused: Double)
     case preview(step: Int, url: URL)
     case image(URL, seed: Int?, seconds: Double?)
     case done([String: Any])
@@ -24,7 +24,8 @@ nonisolated enum WorkerEvent {
         case "step":
             self = .step(
                 step: json["step"] as? Int ?? 0, total: json["total"] as? Int ?? 0,
-                elapsed: (json["elapsed"] as? NSNumber)?.doubleValue ?? 0)
+                elapsed: (json["elapsed"] as? NSNumber)?.doubleValue ?? 0,
+                paused: (json["paused"] as? NSNumber)?.doubleValue ?? 0)
         case "preview":
             self = .preview(step: json["step"] as? Int ?? 0, url: URL(fileURLWithPath: json["path"] as? String ?? ""))
         case "image":

@@ -41,10 +41,11 @@ nonisolated struct InstalledModel: Codable, Identifiable, Hashable {
 
     /// Expected time of one image on this Mac, phase by phase, from what was measured here:
     /// load + prompt encoding once per run, the denoising steps, and the final VAE decode.
+    /// The step rate is stored at full GPU load; `load` stretches it by the Settings limit.
     /// nil until a step speed has been measured.
-    func timeEstimate(steps: Int, megapixels: Double) -> TimeEstimate? {
+    func timeEstimate(steps: Int, megapixels: Double, load: Double = HardwareLoad.fraction) -> TimeEstimate? {
         guard let rate = secondsPerStepPerMP else { return nil }
-        return TimeEstimate(load: loadSeconds ?? 0, perStep: rate * megapixels, steps: max(0, steps),
+        return TimeEstimate(load: loadSeconds ?? 0, perStep: rate * megapixels / max(0.1, load), steps: max(0, steps),
                             decode: (decodeSecondsPerMP ?? 0) * megapixels)
     }
 

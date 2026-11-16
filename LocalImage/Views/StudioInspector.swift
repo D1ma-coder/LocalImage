@@ -4,6 +4,8 @@ struct StudioInspector: View {
     @Environment(Studio.self) private var studio
     @Environment(ModelStore.self) private var store
     @Environment(AppModel.self) private var app
+    /// Read so the time estimate follows the load limit in Settings.
+    @AppStorage(HardwareLoad.percentKey) private var loadPercent = 100
 
     var body: some View {
         @Bindable var studio = studio

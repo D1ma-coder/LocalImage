@@ -255,12 +255,53 @@ def install_mixed_quantization(text_bits: int | None, image_bits: int | None) ->
     WeightApplier.apply_and_quantize_single = staticmethod(apply_and_quantize_single)
 
 
+# ---------------------------------------------------------------- load limit
+class Throttle:
+    """Caps the GPU duty cycle: after each step, idles for compute × (100/percent − 1).
+
+    The percentage is re-read from a small file every step, so changing it in the app's
+    Settings takes effect in the running generation.
+    """
+
+    MAX_PAUSE = 30.0
+
+    def __init__(self, load_file: str | None):
+        self.load_file = load_file
+        self.mark = time.monotonic()
+        self.paused = 0.0  # idle time right before the latest step started
+
+    def percent(self) -> int:
+        if not self.load_file:
+            return 100
+        try:
+            with open(self.load_file, encoding="utf-8") as f:
+                return max(10, min(100, int(f.read().strip() or 100)))
+        except (OSError, ValueError):
+            return 100
+
+    def start(self) -> None:
+        self.mark = time.monotonic()
+        self.paused = 0.0
+
+    def pause(self) -> None:
+        compute = time.monotonic() - self.mark
+        percent = self.percent()
+        wait = min(self.MAX_PAUSE, compute * (100.0 / percent - 1.0)) if percent < 100 else 0.0
+        end = time.monotonic() + wait
+        while not _cancelled and time.monotonic() < end:
+            time.sleep(min(0.1, end - time.monotonic()))
+        self.paused = wait
+        self.mark = time.monotonic()
+
+
 # ---------------------------------------------------------------- previews
 class PreviewCallback:
     """Decodes the current latents every N steps and hands a small JPEG to the app."""
 
-    def __init__(self, model, latent_creator, out_dir: str, every: int, scale: float, max_side: int):
+    def __init__(self, model, latent_creator, out_dir: str, every: int, scale: float, max_side: int,
+                 load_file: str | None = None):
         self.model = model
+        self.throttle = Throttle(load_file)
         self.latent_creator = latent_creator
         self.out_dir = out_dir
         self.every = max(1, every)
@@ -275,6 +316,7 @@ class PreviewCallback:
         self.started = time.time()
         self.previous = latents
         self.failures = 0
+        self.throttle.start()
         emit(
             "denoise",
             start=int(config.init_time_step),
@@ -292,7 +334,8 @@ class PreviewCallback:
         mx.eval(latents)
         step = int(t) + 1
         total = int(config.num_inference_steps)
-        emit("step", step=step, total=total, elapsed=round(time.time() - self.started, 3))
+        emit("step", step=step, total=total, elapsed=round(time.time() - self.started, 3),
+             paused=round(self.throttle.paused, 3))
         if _cancelled:
             raise KeyboardInterrupt
         last = step >= total
@@ -307,6 +350,10 @@ class PreviewCallback:
                 self.failures += 1
                 emit("log", message=f"preview failed ({self.failures}/3): {exc!r}")
         self.previous = latents
+        if _cancelled:
+            raise KeyboardInterrupt
+        if not last:
+            self.throttle.pause()
         if _cancelled:
             raise KeyboardInterrupt
 
@@ -413,6 +460,7 @@ def install_callbacks(preview_options: dict) -> None:
                 every=int(preview_options.get("every", 1)),
                 scale=float(preview_options.get("scale", 0.5)),
                 max_side=int(preview_options.get("maxSide", 768)),
+                load_file=preview_options.get("loadFile"),
             )
         )
         emit("phase", phase="encoding")
@@ -497,6 +545,12 @@ def cmd_generate(job: dict) -> None:
 
     if job.get("hfToken"):
         os.environ["HF_TOKEN"] = job["hfToken"]
+    if job.get("lowPriority"):
+        # Other apps get the CPU first (loading, text encoding, image saving); GPU work is unaffected.
+        try:
+            os.setpriority(os.PRIO_PROCESS, 0, 10)
+        except OSError:
+            pass
     family = job["family"]
     module_name = FAMILIES.get(family)
     if module_name is None:

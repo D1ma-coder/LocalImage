@@ -140,6 +140,8 @@ private struct InstalledRow: View {
     let model: InstalledModel
     @State private var confirmDelete = false
     @State private var hovering = false
+    /// Read so the time badge follows the load limit in Settings.
+    @AppStorage(HardwareLoad.percentKey) private var loadPercent = 100
 
     var body: some View {
         let card = meta.card(for: model.repo)
@@ -222,6 +224,9 @@ private struct InstalledRow: View {
     private func timeHelp(_ time: TimeEstimate) -> LocalizedStringResource {
         let load = Format.duration(time.load), denoise = Format.duration(time.denoise), decode = Format.duration(time.decode)
         let perStep = String(format: "%.1f", time.perStep)
+        if HardwareLoad.percent < 100 {
+            return "Стандартное изображение (1 МП, \(time.steps) шагов) на этом Mac при нагрузке \(HardwareLoad.percent)%: загрузка и промпт ≈ \(load), шаги ≈ \(denoise) (\(perStep) с на шаг), декодирование ≈ \(decode). Оценка по замерам прошлых генераций."
+        }
         return "Стандартное изображение (1 МП, \(time.steps) шагов) на этом Mac: загрузка и промпт ≈ \(load), шаги ≈ \(denoise) (\(perStep) с на шаг), декодирование ≈ \(decode). Оценка по замерам прошлых генераций."
     }
 

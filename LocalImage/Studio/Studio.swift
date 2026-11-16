@@ -85,6 +85,8 @@ final class Studio {
     private var predictedEnd: Date?
     private var lastStepAt: Date?
     private var stepDurationEMA: Double?
+    /// Same, without the pauses of the load limit: the Mac's real speed, which is what gets stored.
+    private var stepComputeEMA: Double?
     private var decodeStartedAt: Date?
     private var measuredDecode: Double?
     private var imageStartedAt: Date?
@@ -158,7 +160,7 @@ final class Studio {
         let model = jobModelID.flatMap { store.model($0) }
         let mp = jobMegapixels
         // Steady-state step time; the warm-up interval only stands in until a normal step is seen.
-        guard let stepDuration = stepDurationEMA ?? model?.secondsPerStepPerMP.map({ $0 * mp }) ?? warmupInterval.map({ $0 * 0.6 }) else { return nil }
+        guard let stepDuration = stepDurationEMA ?? model?.secondsPerStepPerMP.map({ $0 * mp / HardwareLoad.fraction }) ?? warmupInterval.map({ $0 * 0.6 }) else { return nil }
         let decode = measuredDecode ?? model?.decodeSecondsPerMP.map { $0 * mp } ?? max(1.5, stepDuration * 0.6)
         let load = model?.loadSeconds ?? 8
         let stepsPerImage = Double(max(1, totalSteps - startStep))
@@ -354,7 +356,9 @@ final class Studio {
             "family": model.family, "modelPath": model.weightsDir.path, "prompt": prompt,
             "width": width, "height": height, "seeds": seeds, "output": output.path,
             "caps": caps.payload, "lowRam": lowRam, "metadata": false,
+            "lowPriority": HardwareLoad.lowPriority,
             "preview": [
+                "loadFile": HardwareLoad.fileURL.path,
                 "dir": previewDir.path, "every": settings.previewEvery,
                 "scale": settings.previewFull ? 1.0 : 0.5, "maxSide": settings.previewFull ? 1536 : 768,
             ],
@@ -407,6 +411,7 @@ final class Studio {
         imageStartedAt = jobStarted
         lastStepAt = nil
         stepDurationEMA = nil
+        stepComputeEMA = nil
         warmupInterval = nil
         lastImageCompute = nil
         interImageGap = nil
@@ -417,6 +422,7 @@ final class Studio {
         jobModelID = model.id
         startETA()
 
+        HardwareLoad.publish()
         let id = UUID()
         jobID = id
         Task { await run(job: job, modelID: model.id, id: id) }
@@ -520,7 +526,7 @@ final class Studio {
             if imageIndex == 0, results.isEmpty, let started = jobStarted, let id = jobModelID {
                 store.recordTimings(id, loadSeconds: Date().timeIntervalSince(started), decodeSecondsPerMP: nil)
             }
-        case .step(let current, let total, let elapsed):
+        case .step(let current, let total, let elapsed, let paused):
             step = current
             totalSteps = total
             let computed = current - startStep
@@ -531,12 +537,15 @@ final class Studio {
                 if computed <= 1 {
                     // First interval of an image includes warm-up (VAE/kernels): keep it out of the step model.
                     warmupInterval = dt
-                } else if let ema = stepDurationEMA {
-                    // Recent steps matter most; a single outlier (> 2×) moves the estimate only a little.
-                    let weight = dt > ema * 2 ? 0.15 : 0.45
-                    stepDurationEMA = ema * (1 - weight) + dt * weight
                 } else {
-                    stepDurationEMA = dt
+                    // Recent steps matter most; a single outlier (> 2×) moves the estimate only a little.
+                    func smoothed(_ ema: Double?, _ value: Double) -> Double {
+                        guard let ema else { return value }
+                        let weight = value > ema * 2 ? 0.15 : 0.45
+                        return ema * (1 - weight) + value * weight
+                    }
+                    stepDurationEMA = smoothed(stepDurationEMA, dt)
+                    stepComputeEMA = smoothed(stepComputeEMA, max(0.01, dt - paused))
                 }
             }
             lastStepAt = now
@@ -568,7 +577,7 @@ final class Studio {
             results.append(item)
             gallery.insert(item, at: 0)
             shownResult = item
-            if let perStep = stepDurationEMA ?? secondsPerStep, let record {
+            if let perStep = stepComputeEMA ?? secondsPerStep, let record {
                 let mp = Double(record.width * record.height) / 1_048_576
                 store.recordSpeed(modelID, secondsPerStepPerMP: perStep / max(0.1, mp))
             }

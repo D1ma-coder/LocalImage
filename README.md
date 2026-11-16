@@ -11,7 +11,7 @@
 
 LocalImage is a native macOS app that generates images entirely on your Mac. It is written in SwiftUI with Liquid Glass and uses [mflux](https://github.com/filipstrand/mflux) on Apple's MLX as the engine. Prompts, images and models never leave the computer. The interface is available in English and Russian and follows the system language.
 
-You can download any compatible model from Hugging Face inside the app, choose how it is quantized, and watch every denoising step as it happens. The app is designed to work on a Mac with 16 GB of unified memory: it estimates the memory peak before each run and picks safe settings automatically.
+You can download any compatible model from Hugging Face inside the app as a ready MLX build, and watch every denoising step as it happens. The app is designed to work on a Mac with 16 GB of unified memory: it estimates the memory peak before each run and picks safe settings automatically.
 
 **[Install](#installation) · [First image](#first-image) · [Models](#models) · [16 GB of memory](#16-gb-of-memory) · [Files](#where-files-are-stored) · [Build](#building-from-source)**
 
@@ -76,6 +76,7 @@ A Hugging Face token is optional. Enter it in **Settings → Hugging Face**: it 
 - On M1/M2 the app computes in float16, which is about 27% faster on an M2 Pro.
 - Low-memory mode (mflux `--low-ram`) turns on automatically when the estimated peak is close to the limit.
 - Generation and quantization never run at the same time.
+- **Settings → Load** limits the GPU from 30% to 100%: the engine pauses after each step, so the Mac runs cooler and quieter while generation takes proportionally longer. The change applies to a running generation as well, and time estimates account for it. A separate switch lowers the engine's CPU priority.
 
 Measured on an M2 Pro with 16 GB, Z-Image Turbo 4-bit, 768×768, 9 steps: 7.3 s/step in float16 (10.2 s/step in bfloat16), MLX peak 4.6 GB.
 

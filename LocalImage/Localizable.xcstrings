@@ -474,6 +474,16 @@
         }
       }
     },
+    "Без ограничений" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No limit"
+          }
+        }
+      }
+    },
     "Битность" : {
       "localizations" : {
         "en" : {
@@ -490,6 +500,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bit width of ready-made MLX builds"
+          }
+        }
+      }
+    },
+    "Быстрее" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faster"
           }
         }
       }
@@ -550,6 +570,32 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Variant"
+          }
+        }
+      }
+    },
+    "Видеочип" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPU"
+          }
+        }
+      }
+    },
+    "Видеочип занят %lld%% времени, генерация идёт примерно в %@ раза дольше." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Видеочип занят %1$lld%% времени, генерация идёт примерно в %2$@ раза дольше."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The GPU is busy %lld%% of the time; generation takes about %@× as long."
           }
         }
       }
@@ -714,6 +760,16 @@
         }
       }
     },
+    "Генерация использует видеочип полностью — максимальная скорость." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generation uses the GPU fully, for maximum speed."
+          }
+        }
+      }
+    },
     "Готовая MLX-сборка: уже квантована, скачивается меньше и работает сразу" : {
       "localizations" : {
         "en" : {
@@ -830,6 +886,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Engine not installed"
+          }
+        }
+      }
+    },
+    "Движок работает с пониженным приоритетом: загрузка модели, обработка промпта и сохранение не мешают остальным программам. Расчёт на видеочипе это не замедляет. Применяется со следующей генерации." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The engine runs at a lower priority, so loading the model, processing the prompt and saving don't get in the way of other apps. GPU work is not slowed down. Applies from the next generation."
           }
         }
       }
@@ -1554,6 +1620,26 @@
         }
       }
     },
+    "Нагрузка" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Load"
+          }
+        }
+      }
+    },
+    "Нагрузка на Mac" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Load on this Mac"
+          }
+        }
+      }
+    },
     "Напишите промпт внизу и нажмите ⌘↩. Каждый шаг генерации появится здесь сразу, ещё до завершения." : {
       "localizations" : {
         "en" : {
@@ -1810,6 +1896,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Connection lost, retrying in %1$lld s (attempt %2$lld)"
+          }
+        }
+      }
+    },
+    "Ограничивает, насколько сильно генерация загружает видеочип. После каждого шага движок делает паузу, так что видеочип работает только заданную долю времени: Mac меньше греется, вентиляторы тише, а остальные программы и видео идут плавнее. Генерация при этом идёт дольше — например, при 50% примерно вдвое.\n\nМеняется сразу, в том числе во время идущей генерации. Оценки времени учитывают это ограничение." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limits how hard generation drives the GPU. The engine pauses after each step so the GPU works only the set share of the time: the Mac runs cooler, the fans are quieter, and other apps and video stay smooth. Generation takes longer: at 50%, about twice as long.\n\nTakes effect right away, including in a generation that is already running. Time estimates account for this limit."
           }
         }
       }
@@ -2834,6 +2930,22 @@
         }
       }
     },
+    "Стандартное изображение (1 МП, %lld шагов) на этом Mac при нагрузке %lld%%: загрузка и промпт ≈ %@, шаги ≈ %@ (%@ с на шаг), декодирование ≈ %@. Оценка по замерам прошлых генераций." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Стандартное изображение (1 МП, %1$lld шагов) на этом Mac при нагрузке %2$lld%%: загрузка и промпт ≈ %3$@, шаги ≈ %4$@ (%5$@ с на шаг), декодирование ≈ %6$@. Оценка по замерам прошлых генераций."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A standard image (1 MP, %lld steps) on this Mac at %lld%% load: loading and prompt ≈ %@, steps ≈ %@ (%@ s per step), decoding ≈ %@. Estimated from past generations."
+          }
+        }
+      }
+    },
     "Стандартное изображение (1 МП, %lld шагов) на этом Mac: загрузка и промпт ≈ %@, шаги ≈ %@ (%@ с на шаг), декодирование ≈ %@. Оценка по замерам прошлых генераций." : {
       "localizations" : {
         "en" : {
@@ -2890,6 +3002,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Technical generation settings. By default everything is tuned automatically for the model and this Mac — you don't need to change anything. Guidance appears only for models that support it. The negative prompt is in the parameters panel."
+          }
+        }
+      }
+    },
+    "Тише и прохладнее" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quieter and cooler"
           }
         }
       }
@@ -3020,6 +3142,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Installation failed"
+          }
+        }
+      }
+    },
+    "Уступать процессор другим приложениям" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Give other apps priority on the CPU"
           }
         }
       }
