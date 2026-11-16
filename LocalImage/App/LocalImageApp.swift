@@ -19,7 +19,7 @@ struct LocalImageApp: App {
         .commands {
             CommandGroup(replacing: .newItem) {}
             CommandGroup(after: .sidebar) {
-                Button(app.inspectorShown ? "Скрыть параметры" : "Показать параметры") {
+                Button(app.inspectorShown ? String(localized: "Скрыть параметры") : String(localized: "Показать параметры")) {
                     app.section = .studio
                     app.inspectorShown.toggle()
                 }
@@ -57,9 +57,9 @@ enum Section: String, Hashable, CaseIterable {
 
     var title: String {
         switch self {
-        case .studio: "Студия"
-        case .models: "Модели"
-        case .gallery: "Галерея"
+        case .studio: String(localized: "Студия")
+        case .models: String(localized: "Модели")
+        case .gallery: String(localized: "Галерея")
         }
     }
 

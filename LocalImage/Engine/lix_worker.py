@@ -33,6 +33,15 @@ sys.stdout = sys.stderr
 _events = os.fdopen(_EVENT_FD, "w", buffering=1, encoding="utf-8")
 
 
+class WorkerError(RuntimeError):
+    """An error the app shows to the user: `code` selects the localized text there, the message is the English fallback."""
+
+    def __init__(self, code: str, message: str, **params):
+        super().__init__(message)
+        self.code = code
+        self.params = params
+
+
 def emit(event: str, **payload) -> None:
     payload["event"] = event
     _events.write(json.dumps(payload, ensure_ascii=False) + "\n")
@@ -472,7 +481,7 @@ def cmd_generate(job: dict) -> None:
     family = job["family"]
     module_name = FAMILIES.get(family)
     if module_name is None:
-        raise RuntimeError(f"Семейство модели «{family}» не поддерживается")
+        raise WorkerError("unsupported_family", f"Model family '{family}' is not supported", family=family)
 
     if job.get("textBits") or job.get("imageBits"):
         install_mixed_quantization(job.get("textBits"), job.get("imageBits"))
@@ -490,7 +499,7 @@ def cmd_generate(job: dict) -> None:
         module.main()
     except SystemExit as exc:
         if exc.code not in (0, None):
-            raise RuntimeError("mflux отклонил параметры генерации (подробности в журнале)") from None
+            raise WorkerError("generation_rejected", "mflux rejected the generation parameters (details in the log)") from None
     except KeyboardInterrupt:
         pass
 
@@ -498,7 +507,7 @@ def cmd_generate(job: dict) -> None:
         emit("cancelled", images=saved)
         return
     if not saved:
-        raise RuntimeError("Генерация завершилась без изображения (подробности в журнале)")
+        raise WorkerError("no_image", "Generation finished without an image (details in the log)")
     emit(
         "done",
         images=saved,
@@ -528,7 +537,7 @@ def cmd_quantize(job: dict) -> None:
         save.main()
     except SystemExit as exc:
         if exc.code not in (0, None):
-            raise RuntimeError("mflux не смог сохранить модель (подробности в журнале)") from None
+            raise WorkerError("save_failed", "mflux could not save the model (details in the log)") from None
     if _cancelled:
         emit("cancelled")
         return
@@ -552,10 +561,12 @@ def main() -> int:
     except BaseException as exc:  # noqa: BLE001
         traceback.print_exc()
         message = str(exc) or exc.__class__.__name__
+        code = getattr(exc, "code", None)
+        params = getattr(exc, "params", {})
         lowered = message.lower()
         if "out of memory" in lowered or "insufficient memory" in lowered or "[metal]" in lowered:
-            message = "Не хватило памяти. Попробуйте меньшее разрешение, режим экономии памяти или более сильное квантование.\n" + message
-        emit("error", message=message, kind=exc.__class__.__name__)
+            code = "out_of_memory"
+        emit("error", message=message, kind=exc.__class__.__name__, code=code, params=params)
         return 1
 
 

@@ -9,7 +9,7 @@
 [![macOS](https://img.shields.io/badge/macOS-26%2B_·_Apple_Silicon-black?logo=apple)](#installation)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-LocalImage is a native macOS app that generates images entirely on your Mac. It is written in SwiftUI with Liquid Glass and uses [mflux](https://github.com/filipstrand/mflux) on Apple's MLX as the engine. Prompts, images and models never leave the computer. The interface is in Russian; the labels below are given in Russian with a translation.
+LocalImage is a native macOS app that generates images entirely on your Mac. It is written in SwiftUI with Liquid Glass and uses [mflux](https://github.com/filipstrand/mflux) on Apple's MLX as the engine. Prompts, images and models never leave the computer. The interface is available in English and Russian and follows the system language.
 
 You can download any compatible model from Hugging Face inside the app, choose how it is quantized, and watch every denoising step as it happens. The app is designed to work on a Mac with 16 GB of unified memory: it estimates the memory peak before each run and picks safe settings automatically.
 
@@ -29,10 +29,10 @@ Builds are published to [Releases](https://github.com/D1ma-coder/LocalImage/rele
 
 | Platform | Archive |
 |---|---|
-| macOS 26 or later, Apple Silicon (M1 and newer) | `LocalImage-<version>-macos-arm64.zip` |
+| macOS 26 or later, Apple Silicon (M1 and newer) | `LocalImage-<version>-macos-arm64.dmg` |
 
-1. Download the archive and unzip it.
-2. Move **LocalImage.app** to **Applications**.
+1. Download the disk image and open it.
+2. Drag **LocalImage** onto **Applications**.
 3. The app is not signed with a Developer ID and not notarized, so macOS blocks the first launch. Either run
 
    ```sh
@@ -46,15 +46,15 @@ SHA-256 checksums are listed in each release description. Intel Macs are not sup
 ## First image
 
 1. **Install the engine.** On first launch the app offers to install it. [uv](https://github.com/astral-sh/uv) creates an isolated Python 3.12 environment with a pinned `mflux==0.24.0` in `~/Library/Application Support/LocalImage/engine`. If uv is not installed, the app downloads it from its GitHub releases. Nothing is installed system-wide.
-2. **Download a model.** Open **Модели → Каталог** (Models → Catalog). Z-Image Turbo (4-bit) or FLUX.2 klein 4B are good first choices for 16 GB.
-3. **Generate.** Return to **Студия** (Studio), type a prompt and press **⌘↩**. **⌘.** stops instantly, **⇧⌘R** sets a new seed.
+2. **Download a model.** Open **Models → Catalog**. Z-Image Turbo (4-bit) or FLUX.2 klein 4B are good first choices for 16 GB.
+3. **Generate.** Return to **Studio**, type a prompt and press **⌘↩**. **⌘.** stops instantly, **⇧⌘R** sets a new seed.
 
-To start from an existing picture, drag it onto the canvas or press **+** next to the prompt; **Влияние исходника** (source influence) in the right panel controls how much of it is kept.
+To start from an existing picture, drag it onto the canvas or press **+** next to the prompt; **Source influence** in the right panel controls how much of it is kept.
 
 ## Models
 
-- **Каталог** (catalog). Open models with ready MLX builds (4/8-bit) from [mflux-community](https://huggingface.co/mflux-community): Z-Image, FLUX.2 klein, Qwen-Image 2.1, ERNIE-Image, Boogu, MOSS-Image, Iris, Anima and others. Descriptions, licenses, parameter counts and download numbers are loaded from Hugging Face.
-- **Hugging Face** search. Any repository, with filters by format (MLX build / original), architecture, bit width, compatibility and gated access. Icons on each row explain themselves on hover.
+- **Catalog.** Open models with ready MLX builds (4/8-bit) from [mflux-community](https://huggingface.co/mflux-community): Z-Image, FLUX.2 klein, Qwen-Image 2.1, ERNIE-Image, Boogu, MOSS-Image, Iris, Anima and others. Descriptions, licenses, parameter counts and download numbers are loaded from Hugging Face.
+- **Hugging Face search.** Any repository, with filters by format (MLX build / original), architecture, bit width, compatibility and gated access. Icons on each row explain themselves on hover.
 - **Original weights with your own quantization.** The text/VL encoder and the diffusion model are quantized separately. The app suggests the best combinations for the memory of your Mac.
 - **Downloads** resume over HTTP Range after network errors and app restarts, one file at a time. Only the needed weights are downloaded; duplicate single-file checkpoints and repository images are skipped.
 
@@ -67,7 +67,7 @@ To start from an existing picture, drag it onto the canvas or press **+** next t
 
 </details>
 
-A Hugging Face token is optional. Enter it in **Настройки → Hugging Face** (Settings): it is checked as you type and is needed only for gated models and higher API limits. It is stored in `~/Library/Application Support/LocalImage/hf_token` with mode 600, not in the Keychain.
+A Hugging Face token is optional. Enter it in **Settings → Hugging Face**: it is checked as you type and is needed only for gated models and higher API limits. It is stored in `~/Library/Application Support/LocalImage/hf_token` with mode 600, not in the Keychain.
 
 ## 16 GB of memory
 
@@ -84,8 +84,8 @@ Measured on an M2 Pro with 16 GB, Z-Image Turbo 4-bit, 768×768, 9 steps: 7.3 s/
 | What | Where |
 |---|---|
 | Engine | `~/Library/Application Support/LocalImage/engine` |
-| Models | `~/Library/Application Support/LocalImage/models` (can be changed in **Настройки → Папки**) |
-| Images | `~/Pictures/LocalImage` (can be changed in **Настройки → Папки**) |
+| Models | `~/Library/Application Support/LocalImage/models` (can be changed in **Settings → Folders**) |
+| Images | `~/Pictures/LocalImage` (can be changed in **Settings → Folders**) |
 | Hugging Face token | `~/Library/Application Support/LocalImage/hf_token` |
 | Step previews | `$TMPDIR/LocalImagePreviews` |
 

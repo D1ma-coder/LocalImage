@@ -33,7 +33,7 @@ nonisolated enum WorkerEvent {
                 seconds: (json["seconds"] as? NSNumber)?.doubleValue)
         case "done": self = .done(json)
         case "cancelled": self = .cancelled
-        case "error": self = .error(json["message"] as? String ?? "Неизвестная ошибка")
+        case "error": self = .error(Self.errorText(json))
         case "log": self = .log(json["message"] as? String ?? "")
         default: self = .other(name, json)
         }
@@ -59,10 +59,10 @@ final class WorkerProcess {
         onExit: @escaping @MainActor (Int32) -> Void
     ) throws -> WorkerProcess {
         guard let script = Paths.workerScript else {
-            throw NSError(domain: "LocalImage", code: 1, userInfo: [NSLocalizedDescriptionKey: "Не найден скрипт движка в приложении"])
+            throw NSError(domain: "LocalImage", code: 1, userInfo: [NSLocalizedDescriptionKey: String(localized: "Не найден скрипт движка в приложении")])
         }
         guard FileManager.default.isExecutableFile(atPath: Paths.python.path) else {
-            throw NSError(domain: "LocalImage", code: 2, userInfo: [NSLocalizedDescriptionKey: "Движок не установлен"])
+            throw NSError(domain: "LocalImage", code: 2, userInfo: [NSLocalizedDescriptionKey: String(localized: "Движок не установлен")])
         }
         let worker = WorkerProcess()
         let json = try JSONSerialization.data(withJSONObject: payload)
@@ -167,7 +167,7 @@ enum WorkerCall {
                             let message = collected.compactMap { event -> String? in
                                 if case .error(let text) = event { return text }
                                 return nil
-                            }.last ?? (holder?.logTail.text ?? "Код выхода \(status)")
+                            }.last ?? (holder?.logTail.text ?? String(localized: "Код выхода \(status)"))
                             continuation.resume(throwing: NSError(
                                 domain: "LocalImage", code: Int(status),
                                 userInfo: [NSLocalizedDescriptionKey: message]))
@@ -177,6 +177,26 @@ enum WorkerCall {
             } catch {
                 continuation.resume(throwing: error)
             }
+        }
+    }
+}
+
+
+extension WorkerEvent {
+    /// The worker sends an error code plus an English message; the text the user sees is localized here.
+    nonisolated static func errorText(_ json: [String: Any]) -> String {
+        let message = json["message"] as? String ?? ""
+        let params = json["params"] as? [String: Any] ?? [:]
+        switch json["code"] as? String {
+        case "unsupported_family":
+            let family = params["family"] as? String ?? "?"
+            return String(localized: "Семейство модели «\(family)» не поддерживается")
+        case "generation_rejected": return String(localized: "mflux отклонил параметры генерации (подробности в журнале)")
+        case "no_image": return String(localized: "Генерация завершилась без изображения (подробности в журнале)")
+        case "save_failed": return String(localized: "mflux не смог сохранить модель (подробности в журнале)")
+        case "out_of_memory":
+            return String(localized: "Не хватило памяти. Попробуйте меньшее разрешение, режим экономии памяти или более сильное квантование.") + "\n" + message
+        default: return message.isEmpty ? String(localized: "Неизвестная ошибка") : message
         }
     }
 }

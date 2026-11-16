@@ -34,7 +34,7 @@ enum Catalog {
         CatalogEntry(
             family: "z-image-turbo", title: "Z-Image Turbo",
             tagline: "Быстрая, фотореалистичная, 9 шагов",
-            about: "Модель Tongyi-MAI на 6 млрд параметров с текстовым энкодером Qwen3-4B. Лучшее соотношение качества и скорости для 16 ГБ: реализм, свет, текстуры, понимает русский и китайский текст в промпте. Distilled — guidance не нужен.",
+            about: String(localized: "Модель Tongyi-MAI на 6 млрд параметров с текстовым энкодером Qwen3-4B. Лучшее соотношение качества и скорости для 16 ГБ: реализм, свет, текстуры, понимает русский и китайский текст в промпте. Distilled — guidance не нужен."),
             originalRepo: "Tongyi-MAI/Z-Image-Turbo", gated: false, textEncoder: "Qwen3-4B",
             imageParams: 6.15, textParams: 4.02, vaeGB: 0.17,
             prebuilt: [
@@ -45,7 +45,7 @@ enum Catalog {
         CatalogEntry(
             family: "flux2-klein-4b", title: "FLUX.2 klein 4B",
             tagline: "Самая быстрая: 4 шага, лицензия Apache 2.0",
-            about: "Компактная модель Black Forest Labs (4 млрд + Qwen3-4B). Генерирует за 4 шага, хорошо держит композицию и умеет img2img. Отличный выбор для быстрых итераций на 16 ГБ.",
+            about: String(localized: "Компактная модель Black Forest Labs (4 млрд + Qwen3-4B). Генерирует за 4 шага, хорошо держит композицию и умеет img2img. Отличный выбор для быстрых итераций на 16 ГБ."),
             originalRepo: "black-forest-labs/FLUX.2-klein-4B", gated: false, textEncoder: "Qwen3-4B",
             imageParams: 3.88, textParams: 4.02, vaeGB: 0.17,
             prebuilt: [
@@ -56,7 +56,7 @@ enum Catalog {
         CatalogEntry(
             family: "flux3-image-klein", title: "FLUX 3 Image klein",
             tagline: "Сильная типографика и композиция, 16 шагов",
-            about: "Модель 5.6 млрд с энкодером на 4 млрд. Хорошо рисует текст на изображениях, понимает сложные сцены. Оригинал требует принять лицензию на Hugging Face; готовые сборки доступны сразу.",
+            about: String(localized: "Модель 5.6 млрд с энкодером на 4 млрд. Хорошо рисует текст на изображениях, понимает сложные сцены. Оригинал требует принять лицензию на Hugging Face; готовые сборки доступны сразу."),
             originalRepo: "black-forest-labs/flux-3-image-klein", gated: true, textEncoder: "Qwen3-4B",
             imageParams: 5.55, textParams: 4.44, vaeGB: 0.34,
             prebuilt: [
@@ -67,7 +67,7 @@ enum Catalog {
         CatalogEntry(
             family: "qwen-image-2.1-turbo", title: "Qwen-Image 2.1 Turbo",
             tagline: "VL-энкодер Qwen3-VL, точное следование промпту",
-            about: "7.1 млрд в диффузионной части и мультимодальный энкодер Qwen3-VL-8B. Отлично понимает длинные описания и знания о мире, рендерит текст. Здесь особенно полезно раздельное квантование: VL-энкодер большой, но выгружается до начала рисования.",
+            about: String(localized: "7.1 млрд в диффузионной части и мультимодальный энкодер Qwen3-VL-8B. Отлично понимает длинные описания и знания о мире, рендерит текст. Здесь особенно полезно раздельное квантование: VL-энкодер большой, но выгружается до начала рисования."),
             originalRepo: "Qwen/Qwen-Image-2.1-Turbo", gated: false, textEncoder: "Qwen3-VL-8B",
             imageParams: 7.1, textParams: 8.77, vaeGB: 0.68,
             prebuilt: [
@@ -79,7 +79,7 @@ enum Catalog {
         CatalogEntry(
             family: "flux2-klein-9b", title: "FLUX.2 klein 9B",
             tagline: "Старшая klein: больше деталей, 4 шага",
-            about: "9 млрд параметров и энкодер Qwen3-8B. Заметно детальнее 4B при той же скорости в шагах. Некоммерческая лицензия; оригинал — после принятия условий на Hugging Face.",
+            about: String(localized: "9 млрд параметров и энкодер Qwen3-8B. Заметно детальнее 4B при той же скорости в шагах. Некоммерческая лицензия; оригинал — после принятия условий на Hugging Face."),
             originalRepo: "black-forest-labs/FLUX.2-klein-9B", gated: true, textEncoder: "Qwen3-8B",
             imageParams: 9.08, textParams: 8.19, vaeGB: 0.17,
             prebuilt: [
@@ -90,7 +90,7 @@ enum Catalog {
         CatalogEntry(
             family: "krea-2", title: "Krea 2 Turbo",
             tagline: "Широкий диапазон стилей, 8 шагов",
-            about: "12 млрд параметров. Сильна в художественных стилях и креативных экспериментах. На 16 ГБ — только 4-битная сборка и умеренные разрешения.",
+            about: String(localized: "12 млрд параметров. Сильна в художественных стилях и креативных экспериментах. На 16 ГБ — только 4-битная сборка и умеренные разрешения."),
             originalRepo: "krea/Krea-2-Turbo", gated: true, textEncoder: "Qwen3-4B",
             imageParams: 13.1, textParams: 4.44, vaeGB: 0.51,
             prebuilt: [
@@ -101,7 +101,7 @@ enum Catalog {
         CatalogEntry(
             family: "qwen-image", title: "Qwen-Image 2512",
             tagline: "Большая модель 20B с VL-энкодером",
-            about: "20 млрд параметров и Qwen2.5-VL-7B. Лучшее понимание сложных промптов и мира, но медленная и требует 32 ГБ+ для комфортной работы.",
+            about: String(localized: "20 млрд параметров и Qwen2.5-VL-7B. Лучшее понимание сложных промптов и мира, но медленная и требует 32 ГБ+ для комфортной работы."),
             originalRepo: "Qwen/Qwen-Image-2512", gated: false, textEncoder: "Qwen2.5-VL-7B",
             imageParams: 20.4, textParams: 8.29, vaeGB: 0.25,
             prebuilt: [
@@ -112,7 +112,7 @@ enum Catalog {
         CatalogEntry(
             family: "schnell", title: "FLUX.1 schnell",
             tagline: "Классика, 4 шага",
-            about: "Первое поколение FLUX (12 млрд + T5-XXL). Проверенная модель с огромным количеством LoRA в сообществе.",
+            about: String(localized: "Первое поколение FLUX (12 млрд + T5-XXL). Проверенная модель с огромным количеством LoRA в сообществе."),
             originalRepo: "black-forest-labs/FLUX.1-schnell", gated: true, textEncoder: "T5-XXL + CLIP",
             imageParams: 11.9, textParams: 4.88, vaeGB: 0.17,
             prebuilt: [
@@ -122,7 +122,7 @@ enum Catalog {
         CatalogEntry(
             family: "z-image", title: "Z-Image",
             tagline: "Базовая версия Z-Image Turbo",
-            about: "Недистиллированная базовая модель Tongyi-MAI на 6 млрд параметров с энкодером Qwen3-4B. Больше шагов, но поддерживает guidance и негативный промпт.",
+            about: String(localized: "Недистиллированная базовая модель Tongyi-MAI на 6 млрд параметров с энкодером Qwen3-4B. Больше шагов, но поддерживает guidance и негативный промпт."),
             originalRepo: "Tongyi-MAI/Z-Image", gated: false, textEncoder: "Qwen3-4B",
             imageParams: 6.15, textParams: 4.02, vaeGB: 0.17,
             prebuilt: [
@@ -133,7 +133,7 @@ enum Catalog {
         CatalogEntry(
             family: "flux2-klein-base-4b", title: "FLUX.2 klein Base 4B",
             tagline: "Базовая klein 4B",
-            about: "Недистиллированная версия FLUX.2 klein 4B: больше шагов, поддерживает guidance. Лицензия Apache 2.0.",
+            about: String(localized: "Недистиллированная версия FLUX.2 klein 4B: больше шагов, поддерживает guidance. Лицензия Apache 2.0."),
             originalRepo: "black-forest-labs/FLUX.2-klein-base-4B", gated: false, textEncoder: "Qwen3-4B",
             imageParams: 3.88, textParams: 4.02, vaeGB: 0.17,
             prebuilt: [
@@ -144,7 +144,7 @@ enum Catalog {
         CatalogEntry(
             family: "qwen-image-2.1", title: "Qwen-Image 2.1",
             tagline: "Полная версия Qwen-Image 2.1",
-            about: "7.1 млрд в диффузионной части и энкодер Qwen3-VL-8B. Недистиллированная версия: больше шагов, поддерживает guidance.",
+            about: String(localized: "7.1 млрд в диффузионной части и энкодер Qwen3-VL-8B. Недистиллированная версия: больше шагов, поддерживает guidance."),
             originalRepo: "Qwen/Qwen-Image-2.1", gated: false, textEncoder: "Qwen3-VL-8B",
             imageParams: 7.1, textParams: 8.77, vaeGB: 0.68,
             prebuilt: [
@@ -155,7 +155,7 @@ enum Catalog {
         CatalogEntry(
             family: "iris-3b", title: "Iris 3B",
             tagline: "Компактная 3B",
-            about: "Модель speridlabs на 3 млрд параметров. Лицензия Apache 2.0.",
+            about: String(localized: "Модель speridlabs на 3 млрд параметров. Лицензия Apache 2.0."),
             originalRepo: "speridlabs/iris-3b", gated: false, textEncoder: "LLM 4B",
             imageParams: 2.99, textParams: 4.02, vaeGB: 0.17,
             prebuilt: [
@@ -166,7 +166,7 @@ enum Catalog {
         CatalogEntry(
             family: "ernie-image-turbo", title: "ERNIE-Image Turbo",
             tagline: "Модель Baidu, быстрая",
-            about: "Модель Baidu на 8 млрд параметров, дистиллированная версия. Лицензия Apache 2.0.",
+            about: String(localized: "Модель Baidu на 8 млрд параметров, дистиллированная версия. Лицензия Apache 2.0."),
             originalRepo: "baidu/ERNIE-Image-Turbo", gated: false, textEncoder: "LLM 3.9B",
             imageParams: 8.03, textParams: 3.85, vaeGB: 0.17,
             prebuilt: [
@@ -177,7 +177,7 @@ enum Catalog {
         CatalogEntry(
             family: "ernie-image", title: "ERNIE-Image",
             tagline: "Модель Baidu, базовая",
-            about: "Модель Baidu на 8 млрд параметров, базовая версия с guidance. Лицензия Apache 2.0.",
+            about: String(localized: "Модель Baidu на 8 млрд параметров, базовая версия с guidance. Лицензия Apache 2.0."),
             originalRepo: "baidu/ERNIE-Image", gated: false, textEncoder: "LLM 3.9B",
             imageParams: 8.03, textParams: 3.85, vaeGB: 0.17,
             prebuilt: [
@@ -188,7 +188,7 @@ enum Catalog {
         CatalogEntry(
             family: "boogu-image-turbo", title: "Boogu Image Turbo",
             tagline: "10B с мультимодальным энкодером",
-            about: "Модель на 10 млрд параметров с мультимодальным энкодером. Лицензия Apache 2.0.",
+            about: String(localized: "Модель на 10 млрд параметров с мультимодальным энкодером. Лицензия Apache 2.0."),
             originalRepo: "Boogu/Boogu-Image-0.1-Turbo", gated: false, textEncoder: "MLLM 8.8B",
             imageParams: 10.3, textParams: 8.77, vaeGB: 0.34,
             prebuilt: [
@@ -199,7 +199,7 @@ enum Catalog {
         CatalogEntry(
             family: "moss-image-sft", title: "MOSS-Image",
             tagline: "Модель OpenMOSS",
-            about: "Модель OpenMOSS на 5 млрд параметров. Лицензия Apache 2.0.",
+            about: String(localized: "Модель OpenMOSS на 5 млрд параметров. Лицензия Apache 2.0."),
             originalRepo: "OpenMOSS-Team/MOSS-Image-SFT", gated: false, textEncoder: "LLM 8.4B",
             imageParams: 5.08, textParams: 8.4, vaeGB: 0.25,
             prebuilt: [
@@ -210,7 +210,7 @@ enum Catalog {
         CatalogEntry(
             family: "anima-turbo", title: "Anima Turbo",
             tagline: "Лёгкая аниме-модель",
-            about: "Компактная модель circlestone-labs для аниме-иллюстраций, быстрая версия.",
+            about: String(localized: "Компактная модель circlestone-labs для аниме-иллюстраций, быстрая версия."),
             originalRepo: "circlestone-labs/Anima", gated: false, textEncoder: "LLM 0.6B",
             imageParams: 2.4, textParams: 0.6, vaeGB: 0.25,
             prebuilt: [
@@ -221,7 +221,7 @@ enum Catalog {
         CatalogEntry(
             family: "anima-aesthetic", title: "Anima Aesthetic",
             tagline: "Аниме, эстетическая версия",
-            about: "Компактная модель circlestone-labs для аниме-иллюстраций, версия с упором на эстетику.",
+            about: String(localized: "Компактная модель circlestone-labs для аниме-иллюстраций, версия с упором на эстетику."),
             originalRepo: "circlestone-labs/Anima", gated: false, textEncoder: "LLM 0.6B",
             imageParams: 2.4, textParams: 0.6, vaeGB: 0.25,
             prebuilt: [

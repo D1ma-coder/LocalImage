@@ -76,12 +76,13 @@ private struct EngineFooter: View {
             Circle()
                 .fill(engine.isReady ? Color.green : Color.orange)
                 .frame(width: 7, height: 7)
-            Text(engine.isReady ? "MLX · \(engine.info?.mflux ?? "")" : "Движок")
+            Text(engine.isReady ? "MLX · \(engine.info?.mflux ?? "")" : String(localized: "Движок"))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Spacer()
+            let gpuCores = hw.gpuCores.map { String(localized: ", \($0)-ядерный GPU") } ?? ""
             InfoButton(
-                "\(hw.chip), \(Int(hw.memoryGB.rounded())) ГБ объединённой памяти\(hw.gpuCores.map { ", \($0)-ядерный GPU" } ?? "").\n\nДвижок: mflux \(engine.info?.mflux ?? "—") на MLX \(engine.info?.mlx ?? "—") — нативный фреймворк Apple для машинного обучения на Apple Silicon. Модели работают полностью локально, ничего не уходит в сеть.\n\nДоступно GPU без подкачки: \(Format.gb(hw.budgetGB)).",
+                "\(hw.chip), \(Int(hw.memoryGB.rounded())) ГБ объединённой памяти\(gpuCores).\n\nДвижок: mflux \(engine.info?.mflux ?? "—") на MLX \(engine.info?.mlx ?? "—") — нативный фреймворк Apple для машинного обучения на Apple Silicon. Модели работают полностью локально, ничего не уходит в сеть.\n\nДоступно GPU без подкачки: \(Format.gb(hw.budgetGB)).",
                 title: "Этот Mac")
         }
     }

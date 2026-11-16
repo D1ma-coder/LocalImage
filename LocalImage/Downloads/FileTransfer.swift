@@ -86,7 +86,7 @@ nonisolated final class FileTransfer: NSObject, URLSessionDataDelegate, @uncheck
     private func finish() throws {
         let size = partialBytes
         if expectedSize > 0 && size != expectedSize {
-            throw Failure(message: "Размер файла не совпал (\(size) из \(expectedSize))", retryable: true)
+            throw Failure(message: String(localized: "Размер файла не совпал (\(size) из \(expectedSize))"), retryable: true)
         }
         try? FileManager.default.removeItem(at: destination)
         try FileManager.default.moveItem(at: partURL, to: destination)
@@ -129,7 +129,7 @@ nonisolated final class FileTransfer: NSObject, URLSessionDataDelegate, @uncheck
         }
         if handle == nil {
             completionHandler(.cancel)
-            complete(Failure(message: "Не удалось открыть файл для записи", retryable: false))
+            complete(Failure(message: String(localized: "Не удалось открыть файл для записи"), retryable: false))
             return
         }
         completionHandler(.allow)
@@ -140,7 +140,7 @@ nonisolated final class FileTransfer: NSObject, URLSessionDataDelegate, @uncheck
             try handle?.write(contentsOf: data)
         } catch {
             dataTask.cancel()
-            complete(Failure(message: "Ошибка записи на диск: \(error.localizedDescription)", retryable: false))
+            complete(Failure(message: String(localized: "Ошибка записи на диск: \(error.localizedDescription)"), retryable: false))
             return
         }
         lock.lock()

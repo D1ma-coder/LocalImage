@@ -89,7 +89,7 @@ struct DownloadSheet: View {
                     .font(.callout)
             }
             Spacer()
-            if let entry { InfoButton(meta.card(for: entry.originalRepo)?.summary ?? entry.about, title: entry.title) }
+            if let entry { InfoButton(verbatim: meta.card(for: entry.originalRepo)?.summary ?? entry.about, title: LocalizedStringResource(stringLiteral: entry.title)) }
         }
     }
 
@@ -190,7 +190,7 @@ struct DownloadSheet: View {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         Text("Готовая сборка · \(Format.bits(bits))").font(.body.weight(.medium))
-                        if recommended { Chip(text: "Рекомендуем", tint: .green) }
+                        if recommended { Chip(text: String(localized: "Рекомендуем"), tint: .green) }
                     }
                     Text("Текст \(Format.gb(footprint.text)) · изображение \(Format.gb(footprint.image)) · ↓ \(download.map(Format.bytes) ?? Format.gb(footprint.total))")
                         .font(.caption)
@@ -229,12 +229,12 @@ struct DownloadSheet: View {
 
     private var originalCaption: String {
         guard let analysis = original ?? (entry == nil ? repoAnalysis : nil) else {
-            return "Раздельное квантование текстового/VL-энкодера и диффузионной части"
+            return String(localized: "Раздельное квантование текстового/VL-энкодера и диффузионной части")
         }
         var text = "↓ \(Format.bytes(analysis.downloadBytes))"
         if let params {
             let fp = Footprint.from(textParams: params.text, imageParams: params.image, vaeGB: params.vae, textBits: textBits, imageBits: imageBits)
-            text += " → \(Format.gb(fp.total)) на диске"
+            text += " → " + String(localized: "\(Format.gb(fp.total)) на диске")
         }
         return text
     }
@@ -275,7 +275,7 @@ struct DownloadSheet: View {
         .padding(.top, 2)
     }
 
-    private func bitsPicker(_ title: String, selection: Binding<Int>, options: [Int], info: String, params: Double) -> some View {
+    private func bitsPicker(_ title: LocalizedStringResource, selection: Binding<Int>, options: [Int], info: LocalizedStringResource, params: Double) -> some View {
         HStack {
             LabelWithInfo(title, info: info)
             Spacer()
@@ -284,7 +284,7 @@ struct DownloadSheet: View {
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
             Picker("", selection: selection) {
-                ForEach(options, id: \.self) { Text($0 >= 16 ? "BF16" : "\($0) бит").tag($0) }
+                ForEach(options, id: \.self) { Text($0 >= 16 ? "BF16" : String(localized: "\($0) бит")).tag($0) }
             }
             .labelsHidden()
             .pickerStyle(.menu)
@@ -330,7 +330,7 @@ struct DownloadSheet: View {
         do {
             let analysis = try await RepoAnalyzer.analyze(repo: repo, family: familyOverride, engine: engine, countParams: true)
             repoAnalysis = analysis
-            error = analysis.family == nil ? "Архитектура не распознана — выберите её вручную." : nil
+            error = analysis.family == nil ? String(localized: "Архитектура не распознана — выберите её вручную.") : nil
             if analysis.isPrebuilt {
                 choice = .prebuilt(repo)
             } else {

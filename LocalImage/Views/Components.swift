@@ -2,13 +2,18 @@ import SwiftUI
 
 /// The "i" button: every explanation in the app lives behind one of these.
 struct InfoButton: View {
-    let title: String?
-    let text: String
+    let title: LocalizedStringResource?
+    let text: LocalizedStringResource
     @State private var shown = false
 
-    init(_ text: String, title: String? = nil) {
+    init(_ text: LocalizedStringResource, title: LocalizedStringResource? = nil) {
         self.text = text
         self.title = title
+    }
+
+    /// Text that is already final (e.g. a model card from Hugging Face): shown as is, not translated.
+    init(verbatim text: String, title: LocalizedStringResource? = nil) {
+        self.init(LocalizedStringResource(stringLiteral: text), title: title)
     }
 
     var body: some View {
@@ -19,7 +24,7 @@ struct InfoButton: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help(title ?? "Подробнее")
+        .help(Text(title ?? "Подробнее"))
         .popover(isPresented: $shown, arrowEdge: .trailing) {
             VStack(alignment: .leading, spacing: 8) {
                 if let title { Text(title).font(.headline) }
@@ -36,10 +41,10 @@ struct InfoButton: View {
 
 /// A form row label with an optional info button.
 struct LabelWithInfo: View {
-    let title: String
-    let info: String?
+    let title: LocalizedStringResource
+    let info: LocalizedStringResource?
 
-    init(_ title: String, info: String? = nil) {
+    init(_ title: LocalizedStringResource, info: LocalizedStringResource? = nil) {
         self.title = title
         self.info = info
     }
@@ -75,7 +80,7 @@ struct FitBadge: View {
         }
         .font(.caption.weight(.medium))
         .foregroundStyle(color)
-        .help(peak.map { "\(fit.label): пик ≈ \(Format.gb($0)) из \(Format.gb(Hardware.current.budgetGB)) доступных GPU" } ?? fit.label)
+        .help(peak.map { String(localized: "\(fit.label): пик ≈ \(Format.gb($0)) из \(Format.gb(Hardware.current.budgetGB)) доступных GPU") } ?? fit.label)
     }
 }
 
@@ -120,9 +125,9 @@ struct MemoryGauge: View {
 
 struct EmptyStateView: View {
     let symbol: String
-    let title: String
-    let message: String
-    var action: (title: String, run: () -> Void)?
+    let title: LocalizedStringResource
+    let message: LocalizedStringResource
+    var action: (title: LocalizedStringResource, run: () -> Void)?
 
     var body: some View {
         VStack(spacing: 12) {
@@ -136,7 +141,7 @@ struct EmptyStateView: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 360)
             if let action {
-                Button(action.title, action: action.run)
+                Button(action: action.run) { Text(action.title) }
                     .buttonStyle(.glassProminent)
                     .controlSize(.large)
                     .padding(.top, 4)

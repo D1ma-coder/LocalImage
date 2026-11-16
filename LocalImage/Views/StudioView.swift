@@ -75,7 +75,7 @@ private struct ModelSwitcher: View {
             Button("Скачать другие модели…") { app.section = .models }
         } label: {
             HStack(spacing: 6) {
-                Text(studio.selectedModel?.title ?? "Выберите модель")
+                Text(studio.selectedModel?.title ?? String(localized: "Выберите модель"))
                     .font(.headline)
                 if let model = studio.selectedModel {
                     Text(model.quantLabel)
@@ -90,13 +90,13 @@ private struct ModelSwitcher: View {
         }
         .menuIndicator(.hidden)
         .fixedSize()
-        .help(studio.isRunning ? "Модель нельзя сменить во время генерации" : "Выбрать модель")
+        .help(studio.isRunning ? String(localized: "Модель нельзя сменить во время генерации") : String(localized: "Выбрать модель"))
     }
 
     private func subtitle(for model: InstalledModel) -> String {
         let peak = MemoryModel.peakGB(model.footprint)
         var parts = [model.quantLabel, "≈ \(Format.gb(peak))", MemoryModel.fit(peak: peak).label.lowercased()]
-        if let rate = model.secondsPerStepPerMP { parts.append(String(format: "%.1f с/шаг", rate)) }
+        if let rate = model.secondsPerStepPerMP { parts.append(String(localized: "\(String(format: "%.1f", rate)) с/шаг")) }
         return parts.joined(separator: " · ")
     }
 }
@@ -109,9 +109,9 @@ struct InspectorToggle: View {
         Button {
             shown.toggle()   // the inspector column animates itself; an extra SwiftUI animation runs it twice
         } label: {
-            Label(shown ? "Скрыть параметры" : "Показать параметры", systemImage: "sidebar.right")
+            Label(shown ? String(localized: "Скрыть параметры") : String(localized: "Показать параметры"), systemImage: "sidebar.right")
         }
-        .help(shown ? "Скрыть параметры (⌥⌘I)" : "Показать параметры (⌥⌘I)")
+        .help(shown ? String(localized: "Скрыть параметры (⌥⌘I)") : String(localized: "Показать параметры (⌥⌘I)"))
     }
 }
 
@@ -328,7 +328,7 @@ private struct ProgressCapsule: View {
             }
             if let eta = studio.etaSeconds {
                 Divider().frame(height: 14)
-                Text(eta < 1.5 ? "почти готово" : "≈ \(Format.duration(eta.rounded(.up)))")
+                Text(eta < 1.5 ? String(localized: "почти готово") : "≈ \(Format.duration(eta.rounded(.up)))")
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
                     .contentTransition(.numericText(countsDown: true))
@@ -597,8 +597,8 @@ private struct AttachmentCard: View {
                     Text("Исходное изображение")
                         .font(.caption.weight(.medium))
                     Text(studio.caps?.img2img == false
-                         ? "Модель не поддерживает img2img"
-                         : "Влияние \(String(format: "%.2f", studio.settings.strength)) · меняется в параметрах")
+                         ? String(localized: "Модель не поддерживает img2img")
+                         : String(localized: "Влияние \(String(format: "%.2f", studio.settings.strength)) · меняется в параметрах"))
                         .font(.caption2)
                         .foregroundStyle(studio.caps?.img2img == false ? .orange : .secondary)
                 }
@@ -622,8 +622,8 @@ private struct AttachButton: View {
         .buttonStyle(.plain)
         .foregroundStyle(.secondary)
         .help(studio.initImage == nil
-              ? "Прикрепить исходное изображение (img2img) — или перетащите его на холст"
-              : "Заменить исходное изображение")
+              ? String(localized: "Прикрепить исходное изображение (img2img) — или перетащите его на холст")
+              : String(localized: "Заменить исходное изображение"))
     }
 
     private func pick() {

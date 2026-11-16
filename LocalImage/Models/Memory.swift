@@ -24,9 +24,9 @@ nonisolated enum Fit: Int, Comparable {
 
     var label: String {
         switch self {
-        case .comfortable: "Хватает памяти"
-        case .tight: "Впритык"
-        case .tooBig: "Не хватит памяти"
+        case .comfortable: String(localized: "Хватает памяти")
+        case .tight: String(localized: "Впритык")
+        case .tooBig: String(localized: "Не хватит памяти")
         }
     }
 
@@ -96,7 +96,7 @@ nonisolated enum MemoryModel {
         var id: String { "\(textBits)-\(imageBits)" }
         var quality: Double { 0.7 * MemoryModel.imageQuality(imageBits) + 0.3 * MemoryModel.textQuality(textBits) }
         var diskGB: Double { footprint.total }
-        var short: String { "Текст \(Format.bits(textBits)) · Изображение \(Format.bits(imageBits))" }
+        var short: String { String(localized: "Текст \(Format.bits(textBits)) · Изображение \(Format.bits(imageBits))") }
     }
 
     static func allCombos(textParams: Double, imageParams: Double, vaeGB: Double, hardware: Hardware = .current) -> [Combo] {
@@ -123,17 +123,17 @@ nonisolated enum MemoryModel {
         var result: [Combo] = []
         let comfortable = combos.filter { $0.fit == .comfortable }
         if var top = best(comfortable) ?? best(combos.filter { $0.fit == .tight }) {
-            top.label = "Рекомендуем"
+            top.label = String(localized: "Рекомендуем")
             result.append(top)
             let lighter = comfortable.filter { $0.diskGB <= top.diskGB * 0.72 && $0.imageBits >= 4 }
             if var balance = best(lighter) {
-                balance.label = "Баланс"
+                balance.label = String(localized: "Баланс")
                 result.append(balance)
             }
         }
         if var minimum = combos.filter({ $0.textBits == 4 && $0.imageBits == 4 }).first,
            !result.contains(where: { $0.id == minimum.id }) {
-            minimum.label = "Минимум памяти"
+            minimum.label = String(localized: "Минимум памяти")
             result.append(minimum)
         }
         return result

@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.0 — 2026-11-16
+
+- English interface. The app follows the system language: English or Russian. Every string, including errors from the engine, is localized.
+- Releases are a `.dmg` disk image: drag LocalImage onto Applications.
+- img2img: the progress and the time estimate count only the steps that actually run; the estimate before a run includes model loading and decoding.
+- The parameters panel keeps a fixed width: typing, sliders and other changes no longer resize it or shift its content.
+- Changing a parameter no longer rebuilds the window and toolbar; opening the sidebar no longer recreates its button.
+- The parameters panel opens with a single animation.
+- Switching to Studio no longer focuses or selects the prompt.
+- Removed the progress bar under the canvas (the progress capsule and the step slots remain).
+
 ## 1.0.0 — 2026-11-15
 
 - Native SwiftUI app for macOS 26+ on Apple Silicon with Liquid Glass; generation runs locally on mflux 0.24.0 / MLX in an isolated uv environment that the app installs itself.

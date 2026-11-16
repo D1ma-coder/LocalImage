@@ -17,7 +17,7 @@ enum Aspect: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var title: String { self == .source ? "Как у исходника" : rawValue }
+    var title: String { self == .source ? String(localized: "Как у исходника") : rawValue }
     static var presets: [Aspect] { [.square, .photo, .classic, .wide, .portrait, .tall, .story] }
 }
 
@@ -36,10 +36,10 @@ enum Quality: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .draft: "Черновик"
-        case .standard: "Стандарт"
-        case .high: "Высокое"
-        case .max: "Максимум"
+        case .draft: String(localized: "Черновик")
+        case .standard: String(localized: "Стандарт")
+        case .high: String(localized: "Высокое")
+        case .max: String(localized: "Максимум")
         }
     }
 }
@@ -49,9 +49,9 @@ enum MemoryMode: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .auto: "Авто"
-        case .saver: "Экономия"
-        case .speed: "Скорость"
+        case .auto: String(localized: "Авто")
+        case .saver: String(localized: "Экономия")
+        case .speed: String(localized: "Скорость")
         }
     }
 }
@@ -61,7 +61,7 @@ enum Precision: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .auto: "Авто"
+        case .auto: String(localized: "Авто")
         case .bfloat16: "bfloat16"
         case .float16: "float16"
         }

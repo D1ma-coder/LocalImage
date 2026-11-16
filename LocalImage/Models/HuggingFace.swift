@@ -81,10 +81,10 @@ nonisolated enum HFClient {
         var status: Int
         var errorDescription: String? {
             switch status {
-            case 401, 403: "Нет доступа: примите лицензию на странице модели и укажите токен Hugging Face в настройках."
-            case 404: "Репозиторий или файл не найден."
-            case 429: "Hugging Face ограничил частоту запросов. Повторите через минуту."
-            default: "Hugging Face ответил ошибкой \(status)."
+            case 401, 403: String(localized: "Нет доступа: примите лицензию на странице модели и укажите токен Hugging Face в настройках.")
+            case 404: String(localized: "Репозиторий или файл не найден.")
+            case 429: String(localized: "Hugging Face ограничил частоту запросов. Повторите через минуту.")
+            default: String(localized: "Hugging Face ответил ошибкой \(status).")
             }
         }
     }

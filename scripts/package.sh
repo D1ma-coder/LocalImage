@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Builds LocalImage.app (Release, Apple Silicon) and packs it into dist/LocalImage-v<version>-macos-arm64.zip.
+# Builds LocalImage.app (Release, Apple Silicon) and packs it into dist/LocalImage-v<version>-macos-arm64.dmg:
+# a compressed disk image with the app and an Applications shortcut to drag it onto.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -19,6 +20,11 @@ app="$derived/Build/Products/Release/LocalImage.app"
 # Xcode already signs ad hoc (no Developer ID); just make sure the bundle is intact.
 codesign --verify --deep --strict "$app"
 
-archive="dist/LocalImage-v${version}-macos-arm64.zip"
-ditto -c -k --keepParent "$app" "$archive"
-echo "$archive"
+staging=$(mktemp -d)
+ditto "$app" "$staging/LocalImage.app"
+ln -s /Applications "$staging/Applications"
+image="dist/LocalImage-v${version}-macos-arm64.dmg"
+hdiutil create -volname "LocalImage ${version}" -srcfolder "$staging" -fs HFS+ -format UDZO -imagekey zlib-level=9 -ov "$image" >/dev/null
+rm -rf "$staging"
+hdiutil verify "$image" >/dev/null
+echo "$image"

@@ -14,7 +14,16 @@ enum DownloadTarget: Identifiable, Hashable {
 }
 
 struct ModelsView: View {
-    enum Tab: String, CaseIterable { case installed = "Мои модели", catalog = "Каталог", hub = "Hugging Face" }
+    enum Tab: String, CaseIterable {
+        case installed = "Мои модели", catalog = "Каталог", hub = "Hugging Face"
+        var title: String {
+            switch self {
+            case .installed: String(localized: "Мои модели")
+            case .catalog: String(localized: "Каталог")
+            case .hub: "Hugging Face"
+            }
+        }
+    }
 
     @Environment(ModelStore.self) private var store
     @State private var tab: Tab = .catalog
@@ -42,7 +51,7 @@ struct ModelsView: View {
             ToolbarItem(placement: .principal) {
                 Picker("Раздел", selection: $tab) {
                     ForEach(Tab.allCases, id: \.self) { tab in
-                        Text(tab.rawValue).tag(tab)
+                        Text(tab.title).tag(tab)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -74,7 +83,7 @@ private struct HardwareStrip: View {
             Label("GPU \(Format.gb(hw.budgetGB))", systemImage: "square.stack.3d.up")
             Label("\(Format.bytes(free)) свободно", systemImage: "internaldrive")
             Spacer()
-            InfoButton(hardwareAdvice(hw), title: "Подсказки по железу")
+            InfoButton(verbatim: hardwareAdvice(hw), title: "Подсказки по железу")
         }
         .font(.callout)
         .foregroundStyle(.secondary)
@@ -83,18 +92,18 @@ private struct HardwareStrip: View {
 
     private func hardwareAdvice(_ hw: Hardware) -> String {
         var lines: [String] = []
-        lines.append("На этом Mac GPU может держать ≈ \(Format.gb(hw.budgetGB)) без подкачки — это главный ориентир при выборе модели и квантования.")
+        lines.append(String(localized: "На этом Mac GPU может держать ≈ \(Format.gb(hw.budgetGB)) без подкачки — это главный ориентир при выборе модели и квантования."))
         if hw.memoryGB <= 18 {
-            lines.append("16 ГБ: лучший выбор — Z-Image Turbo, FLUX.2 klein 4B, FLUX 3 klein и Qwen-Image 2.1 Turbo. Для изображения берите 8 бит, если влезает, текстовый энкодер — 4–8 бит. Модели на 12–20 млрд параметров работают только в 4 битах и на умеренных разрешениях.")
+            lines.append(String(localized: "16 ГБ: лучший выбор — Z-Image Turbo, FLUX.2 klein 4B, FLUX 3 klein и Qwen-Image 2.1 Turbo. Для изображения берите 8 бит, если влезает, текстовый энкодер — 4–8 бит. Модели на 12–20 млрд параметров работают только в 4 битах и на умеренных разрешениях."))
         } else if hw.memoryGB <= 36 {
-            lines.append("24–36 ГБ: комфортно работают все модели до 12 млрд в 8 битах; Qwen-Image 20B — в 4–6 битах.")
+            lines.append(String(localized: "24–36 ГБ: комфортно работают все модели до 12 млрд в 8 битах; Qwen-Image 20B — в 4–6 битах."))
         } else {
-            lines.append("Памяти достаточно для любых моделей в 8 битах или без квантования.")
+            lines.append(String(localized: "Памяти достаточно для любых моделей в 8 битах или без квантования."))
         }
         if hw.prefersFloat16 {
-            lines.append("Чип \(hw.chip.replacingOccurrences(of: "Apple ", with: "")) медленно работает с bfloat16, поэтому приложение автоматически считает в float16 там, где модель это поддерживает (≈ +25% скорости).")
+            lines.append(String(localized: "Чип \(hw.chip.replacingOccurrences(of: "Apple ", with: "")) медленно работает с bfloat16, поэтому приложение автоматически считает в float16 там, где модель это поддерживает (≈ +25% скорости)."))
         }
-        lines.append("Квантование: диффузионная часть сильнее влияет на качество, чем текстовый/VL-энкодер, а энкодер выгружается до начала рисования — поэтому лучшие сочетания обычно «энкодер 4–6 бит + изображение 8 бит».")
+        lines.append(String(localized: "Квантование: диффузионная часть сильнее влияет на качество, чем текстовый/VL-энкодер, а энкодер выгружается до начала рисования — поэтому лучшие сочетания обычно «энкодер 4–6 бит + изображение 8 бит»."))
         return lines.joined(separator: "\n\n")
     }
 }
@@ -219,7 +228,7 @@ private struct InstalledRow: View {
             HStack(spacing: 12) {
                 if let rate = model.secondsPerStepPerMP {
                     HintIcon(symbol: "speedometer", help: "Измеренная скорость на этом Mac: \(String(format: "%.1f", rate)) с на шаг при 1 МП",
-                             text: String(format: "%.1f с", rate))
+                             text: String(localized: "\(String(format: "%.1f", rate)) с"))
                 }
                 let peak = MemoryModel.peakGB(model.footprint)
                 FitBadge(fit: MemoryModel.fit(peak: peak), peak: peak)
@@ -257,7 +266,7 @@ private struct InstalledRow: View {
             }
         case .failed:
             HStack(spacing: 8) {
-                Text(model.error ?? "Ошибка")
+                Text(model.error ?? String(localized: "Ошибка"))
                     .font(.caption)
                     .foregroundStyle(.red)
                     .lineLimit(2)
@@ -271,7 +280,7 @@ private struct InstalledRow: View {
     private func downloadCaption(_ progress: TransferProgress?) -> String {
         guard let progress, progress.total > 0 else { return "В очереди" }
         if !progress.note.isEmpty { return progress.note }
-        var parts = ["\(Format.bytes(progress.done)) из \(Format.bytes(progress.total))"]
+        var parts = [String(localized: "\(Format.bytes(progress.done)) из \(Format.bytes(progress.total))")]
         if progress.bytesPerSecond > 1 {
             parts.append(Format.speed(progress.bytesPerSecond))
             parts.append(Format.duration(progress.eta))
@@ -279,10 +288,10 @@ private struct InstalledRow: View {
         return parts.joined(separator: " · ")
     }
 
-    private func controlButton(_ symbol: String, _ help: String, action: @escaping () -> Void) -> some View {
+    private func controlButton(_ symbol: String, _ help: LocalizedStringResource, action: @escaping () -> Void) -> some View {
         Button(action: action) { Image(systemName: symbol) }
             .buttonStyle(.borderless)
-            .help(help)
+            .help(Text(help))
     }
 }
 
@@ -314,7 +323,7 @@ struct HFAvatar: View {
 /// Small icon whose meaning appears on hover.
 struct HintIcon: View {
     let symbol: String
-    let help: String
+    let help: LocalizedStringResource
     var tint: Color = .secondary
     var text: String? = nil
 
@@ -349,7 +358,7 @@ struct ModelBadges: View {
             }
             if let bits = prebuiltBits {
                 HintIcon(symbol: "cpu", help: "Готовая MLX-сборка: уже квантована, скачивается меньше и работает сразу", tint: .green,
-                         text: bits.map { "\($0)-бит" } ?? "BF16")
+                         text: Format.bits(bits))
             }
             if let family {
                 HintIcon(symbol: "checkmark.seal.fill", help: "Совместима с движком: архитектура «\(Catalog.title(for: family))»", tint: .accentColor)
@@ -482,7 +491,7 @@ private struct CatalogCard: View {
                     FitBadge(fit: MemoryModel.fit(peak: best.1), peak: best.1)
                         .help("Лучшая готовая сборка для этого Mac: \(Format.bits(best.0.bits))")
                 }
-                Button(installed ? "Ещё вариант" : "Скачать", action: action)
+                Button(installed ? String(localized: "Ещё вариант") : String(localized: "Скачать"), action: action)
                     .buttonStyle(.glassProminent)
                     .controlSize(.regular)
             }
@@ -503,10 +512,10 @@ enum HubSort: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .trending: "В тренде"
-        case .downloads: "Популярные"
-        case .likes: "Любимые"
-        case .updated: "Недавно обновлённые"
+        case .trending: String(localized: "В тренде")
+        case .downloads: String(localized: "Популярные")
+        case .likes: String(localized: "Любимые")
+        case .updated: String(localized: "Недавно обновлённые")
         }
     }
     var symbol: String {
@@ -524,9 +533,9 @@ enum HubFormat: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .all: "Все форматы"
-        case .mlx: "MLX-сборки"
-        case .original: "Оригиналы"
+        case .all: String(localized: "Все форматы")
+        case .mlx: String(localized: "MLX-сборки")
+        case .original: String(localized: "Оригиналы")
         }
     }
 }
@@ -620,7 +629,7 @@ private struct HubSearch: View {
                 }
                 .pickerStyle(.inline)
             } label: {
-                Label(family.isEmpty ? "Архитектура" : Catalog.title(for: family), systemImage: "cube")
+                Label(family.isEmpty ? String(localized: "Архитектура") : Catalog.title(for: family), systemImage: "cube")
             }
             .fixedSize()
 
@@ -632,7 +641,7 @@ private struct HubSearch: View {
                 }
                 .pickerStyle(.inline)
             } label: {
-                Label(bits == 0 ? "Битность" : (bits == 16 ? "BF16" : "\(bits)-бит"), systemImage: "square.stack.3d.down.right")
+                Label(bits == 0 ? String(localized: "Битность") : (bits == 16 ? "BF16" : String(localized: "\(bits)-бит")), systemImage: "square.stack.3d.down.right")
             }
             .fixedSize()
             .help("Битность готовых MLX-сборок")

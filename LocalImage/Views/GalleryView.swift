@@ -154,7 +154,7 @@ private struct GalleryDetail: View {
         .frame(minWidth: 900, minHeight: 620)
     }
 
-    private func row(_ title: String, _ value: String) -> some View {
+    private func row(_ title: LocalizedStringResource, _ value: String) -> some View {
         GridRow {
             Text(title).foregroundStyle(.secondary)
             Text(value).textSelection(.enabled).monospacedDigit()

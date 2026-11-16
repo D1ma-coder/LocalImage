@@ -90,7 +90,7 @@ struct StudioInspector: View {
                                     .foregroundStyle(.secondary)
                                     .monospacedDigit()
                             }
-                            InfoButton(memoryInfo(peak: peak, fit: fit), title: "Память и скорость")
+                            InfoButton(verbatim: memoryInfo(peak: peak, fit: fit), title: "Память и скорость")
                         }
                         MemoryGauge(peak: peak)
                     }
@@ -103,17 +103,20 @@ struct StudioInspector: View {
 
     private func memoryInfo(peak: Double, fit: Fit) -> String {
         let hw = Hardware.current
-        var text = "Оценка пикового расхода памяти для текущих параметров: ≈ \(Format.gb(peak)). GPU этого Mac может держать без подкачки ≈ \(Format.gb(hw.budgetGB)) из \(Int(hw.memoryGB.rounded())) ГБ.\n\n"
-        text += "Текстовый энкодер и диффузионная часть не находятся в памяти одновременно: энкодер выгружается сразу после обработки промпта."
+        let memory = Int(hw.memoryGB.rounded())
+        var parts = [
+            String(localized: "Оценка пикового расхода памяти для текущих параметров: ≈ \(Format.gb(peak)). GPU этого Mac может держать без подкачки ≈ \(Format.gb(hw.budgetGB)) из \(memory) ГБ."),
+            String(localized: "Текстовый энкодер и диффузионная часть не находятся в памяти одновременно: энкодер выгружается сразу после обработки промпта."),
+        ]
         switch fit {
         case .comfortable: break
-        case .tight: text += "\n\nВпритык: возможна подкачка и замедление. Помогут меньшее качество, режим «Экономия» или более сильное квантование."
-        case .tooBig: text += "\n\nСкорее всего не хватит памяти. Уменьшите качество или выберите сборку с меньшей битностью."
+        case .tight: parts.append(String(localized: "Впритык: возможна подкачка и замедление. Помогут меньшее качество, режим «Экономия» или более сильное квантование."))
+        case .tooBig: parts.append(String(localized: "Скорее всего не хватит памяти. Уменьшите качество или выберите сборку с меньшей битностью."))
         }
         if studio.estimatedSeconds != nil {
-            text += "\n\nВремя оценено по прошлым генерациям этой модели на этом Mac."
+            parts.append(String(localized: "Время оценено по прошлым генерациям этой модели на этом Mac."))
         }
-        return text
+        return parts.joined(separator: "\n\n")
     }
 }
 
@@ -254,7 +257,7 @@ private struct AspectPicker: View {
                         VStack(spacing: 3) {
                             shape(for: aspect)
                                 .frame(width: 22, height: 22)
-                            Text(aspect == .source ? "Исх." : aspect.rawValue)
+                            Text(aspect == .source ? String(localized: "Исх.") : aspect.rawValue)
                                 .font(.system(size: 9, weight: .medium))
                                 .monospacedDigit()
                         }

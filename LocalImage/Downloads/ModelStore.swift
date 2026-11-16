@@ -271,14 +271,14 @@ final class ModelStore {
         if needed > free - 2_000_000_000 {
             update(id) {
                 $0.status = .failed
-                $0.error = "Мало места на диске: нужно \(Format.bytes(needed)), свободно \(Format.bytes(free))."
+                $0.error = String(localized: "Мало места на диске: нужно \(Format.bytes(needed)), свободно \(Format.bytes(free)).")
             }
             return false
         }
         while let active = activeDownload, active != id {
             if Task.isCancelled { return false }
             update(id) { if $0.status != .queued { $0.status = .queued } }
-            progress.note = "В очереди"
+            progress.note = String(localized: "В очереди")
             try? await Task.sleep(for: .milliseconds(500))
         }
         if Task.isCancelled { return false }
@@ -335,7 +335,7 @@ final class ModelStore {
                         return false
                     }
                     let delay = min(60.0, pow(2.0, Double(attempt - 1)))
-                    progress.note = "Обрыв связи, повтор через \(Int(delay)) с (попытка \(attempt + 1))"
+                    progress.note = String(localized: "Обрыв связи, повтор через \(Int(delay)) с (попытка \(attempt + 1))")
                     try? await Task.sleep(for: .seconds(delay))
                     progress.note = ""
                 }
@@ -352,11 +352,11 @@ final class ModelStore {
     private func quantize(_ id: String, progress: TransferProgress) async -> Bool {
         guard let model = model(id) else { return false }
         update(id) { $0.status = .quantizing }
-        progress.note = "Ждём окончания генерации…"
+        progress.note = String(localized: "Ждём окончания генерации…")
         await gate.acquire("quantize")
         defer { gate.release() }
         if Task.isCancelled { return false }
-        progress.note = "Квантование: текст \(Format.bits(model.textBits)), изображение \(Format.bits(model.imageBits))"
+        progress.note = String(localized: "Квантование: текст \(Format.bits(model.textBits)), изображение \(Format.bits(model.imageBits))")
         try? FileManager.default.removeItem(at: model.optimizedDir)
         let payload: [String: Any] = [
             "source": model.sourceDir.path, "destination": model.optimizedDir.path, "family": model.family,
@@ -381,7 +381,7 @@ final class ModelStore {
                         } else {
                             continuation.resume(returning: .failure(NSError(
                                 domain: "LocalImage", code: Int(status),
-                                userInfo: [NSLocalizedDescriptionKey: errorText ?? "Квантование не удалось (код \(status))"])))
+                                userInfo: [NSLocalizedDescriptionKey: errorText ?? String(localized: "Квантование не удалось (код \(status))")])))
                         }
                     })
                 quantizers[id] = worker

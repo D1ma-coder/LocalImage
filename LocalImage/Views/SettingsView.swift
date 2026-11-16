@@ -31,7 +31,7 @@ private struct GenerationSettingsTab: View {
                 AdvancedRows(caps: studio.caps)
             } header: {
                 HStack(spacing: 5) {
-                    Text(studio.selectedModel.map { "Для модели «\($0.title)»" } ?? "Генерация")
+                    Text(studio.selectedModel.map { String(localized: "Для модели «\($0.title)»") } ?? String(localized: "Генерация"))
                     InfoButton("Технические параметры генерации. По умолчанию всё подобрано автоматически под модель и этот Mac — менять их не обязательно. Guidance появляется только у моделей, которые его поддерживают. Негативный промпт — в панели параметров.")
                 }
             }
@@ -105,7 +105,7 @@ private struct AccountSettings: View {
                 check = .valid(name)
             } catch {
                 guard !Task.isCancelled else { return }
-                check = .invalid(value.hasPrefix("hf_") ? "Токен не принят Hugging Face" : "Токен должен начинаться с hf_")
+                check = .invalid(value.hasPrefix("hf_") ? String(localized: "Токен не принят Hugging Face") : String(localized: "Токен должен начинаться с hf_"))
             }
         }
     }
@@ -131,7 +131,7 @@ private struct StorageSettings: View {
         .formStyle(.grouped)
     }
 
-    private func folderRow(_ title: String, path: Binding<String>, fallback: URL, info: String, changed: @escaping () -> Void) -> some View {
+    private func folderRow(_ title: LocalizedStringResource, path: Binding<String>, fallback: URL, info: LocalizedStringResource, changed: @escaping () -> Void) -> some View {
         LabeledContent {
             HStack {
                 Text((path.wrappedValue.isEmpty ? fallback.path : path.wrappedValue).replacingOccurrences(of: NSHomeDirectory(), with: "~"))

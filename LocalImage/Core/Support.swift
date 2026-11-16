@@ -34,19 +34,20 @@ nonisolated enum Format {
     }
 
     static func gb(_ value: Double) -> String {
-        value < 10 ? String(format: "%.1f ГБ", value) : String(format: "%.0f ГБ", value)
+        let number = value < 10 ? String(format: "%.1f", value) : String(format: "%.0f", value)
+        return String(localized: "\(number) ГБ")
     }
 
     static func speed(_ bytesPerSecond: Double) -> String {
-        bytes(Int64(bytesPerSecond)) + "/с"
+        bytes(Int64(bytesPerSecond)) + String(localized: "/с")
     }
 
     static func duration(_ seconds: Double) -> String {
         guard seconds.isFinite, seconds >= 0 else { return "—" }
-        if seconds < 60 { return String(format: "%.0f с", seconds) }
+        if seconds < 60 { let s = String(format: "%.0f", seconds); return String(localized: "\(s) с") }
         let minutes = Int(seconds) / 60
-        if minutes < 60 { return "\(minutes) мин \(Int(seconds) % 60) с" }
-        return "\(minutes / 60) ч \(minutes % 60) мин"
+        if minutes < 60 { return String(localized: "\(minutes) мин \(Int(seconds) % 60) с") }
+        return String(localized: "\(minutes / 60) ч \(minutes % 60) мин")
     }
 
     static func count(_ value: Int) -> String {
@@ -57,7 +58,7 @@ nonisolated enum Format {
 
     static func bits(_ bits: Int?) -> String {
         guard let bits, bits < 16 else { return "BF16" }
-        return "\(bits)-бит"
+        return String(localized: "\(bits)-бит")
     }
 }
 
@@ -115,7 +116,7 @@ enum ProcessRunner {
     struct Failure: LocalizedError {
         let status: Int32
         let tail: String
-        var errorDescription: String? { "Процесс завершился с кодом \(status).\n\(tail)" }
+        var errorDescription: String? { String(localized: "Процесс завершился с кодом \(status).\n\(tail)") }
     }
 
     /// Runs a command, streaming every output line (stdout + stderr) to `onLine` on the main actor.

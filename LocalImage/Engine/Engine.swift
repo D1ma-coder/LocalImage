@@ -93,17 +93,17 @@ final class Engine {
         installLog.removeAll()
         Paths.ensure(Paths.engine)
         do {
-            set(step: 1, "Менеджер окружений", "Ищем uv…")
+            set(step: 1, String(localized: "Менеджер окружений"), String(localized: "Ищем uv…"))
             let uv = try await locateOrFetchUV()
 
-            set(step: 2, "Python 3.12", "Создаём изолированное окружение…")
+            set(step: 2, "Python 3.12", String(localized: "Создаём изолированное окружение…"))
             if !FileManager.default.isExecutableFile(atPath: Paths.python.path) {
                 try await ProcessRunner.run(
                     uv, ["venv", "--python", "3.12", "--seed", Paths.venv.path],
                     environment: uvEnvironment, onLine: { [weak self] in self?.record($0) })
             }
 
-            set(step: 3, "MLX и mflux", "Загружаем пакеты (~1 ГБ)…")
+            set(step: 3, String(localized: "MLX и mflux"), String(localized: "Загружаем пакеты (~1 ГБ)…"))
             try await ProcessRunner.run(
                 uv, ["pip", "install", "--python", Paths.python.path, "mflux==\(Self.mfluxVersion)"],
                 environment: uvEnvironment, onLine: { [weak self] line in
@@ -113,7 +113,7 @@ final class Engine {
                     }
                 })
 
-            set(step: 4, "Проверка", "Запускаем движок…")
+            set(step: 4, String(localized: "Проверка"), String(localized: "Запускаем движок…"))
             try await refreshFamilies()
             state = .ready
         } catch {
@@ -142,7 +142,7 @@ final class Engine {
             try JSONEncoder().encode(info).write(to: Paths.familiesCache)
             return
         }
-        throw NSError(domain: "LocalImage", code: 3, userInfo: [NSLocalizedDescriptionKey: "Движок не ответил"])
+        throw NSError(domain: "LocalImage", code: 3, userInfo: [NSLocalizedDescriptionKey: String(localized: "Движок не ответил")])
     }
 
     // MARK: uv
@@ -167,11 +167,11 @@ final class Engine {
             record("uv: \(found)")
             return URL(fileURLWithPath: found)
         }
-        set(step: 1, "Менеджер окружений", "Скачиваем uv с GitHub (astral-sh/uv)…")
+        set(step: 1, String(localized: "Менеджер окружений"), String(localized: "Скачиваем uv с GitHub (astral-sh/uv)…"))
         let url = URL(string: "https://github.com/astral-sh/uv/releases/latest/download/uv-aarch64-apple-darwin.tar.gz")!
         let (archive, response) = try await URLSession.shared.download(from: url)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-            throw NSError(domain: "LocalImage", code: 4, userInfo: [NSLocalizedDescriptionKey: "Не удалось скачать uv"])
+            throw NSError(domain: "LocalImage", code: 4, userInfo: [NSLocalizedDescriptionKey: String(localized: "Не удалось скачать uv")])
         }
         let unpack = Paths.ensure(Paths.engine.appendingPathComponent("uv-download"))
         try await ProcessRunner.run(

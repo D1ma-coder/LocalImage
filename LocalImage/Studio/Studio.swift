@@ -18,12 +18,12 @@ final class Studio {
         var title: String {
             switch self {
             case .idle: ""
-            case .starting: "Запуск движка"
-            case .loading: "Загрузка модели"
-            case .encoding: "Кодирование промпта"
-            case .denoising: "Рисование"
-            case .decoding: "Декодирование"
-            case .finishing: "Сохранение"
+            case .starting: String(localized: "Запуск движка")
+            case .loading: String(localized: "Загрузка модели")
+            case .encoding: String(localized: "Кодирование промпта")
+            case .denoising: String(localized: "Рисование")
+            case .decoding: String(localized: "Декодирование")
+            case .finishing: String(localized: "Сохранение")
             }
         }
     }
@@ -275,10 +275,10 @@ final class Studio {
     func generate() {
         guard !isRunning else { return }
         lastError = nil
-        guard engine.isReady else { lastError = "Движок ещё не установлен."; return }
-        guard let model = selectedModel, let caps else { lastError = "Выберите загруженную модель."; return }
+        guard engine.isReady else { lastError = String(localized: "Движок ещё не установлен."); return }
+        guard let model = selectedModel, let caps else { lastError = String(localized: "Выберите загруженную модель."); return }
         let prompt = settings.prompt.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !prompt.isEmpty else { lastError = "Опишите, что нарисовать."; return }
+        guard !prompt.isEmpty else { lastError = String(localized: "Опишите, что нарисовать."); return }
 
         if settings.randomSeed { settings.seed = Int.random(in: 1...999_999_999) }
         let seeds = (0..<settings.count).map { settings.seed + $0 }
@@ -374,7 +374,7 @@ final class Studio {
     }
 
     private func run(job: [String: Any], modelID: String, id: UUID) async {
-        if gate.holder != nil { appendLog("Ждём завершения предыдущей задачи…") }
+        if gate.holder != nil { appendLog(String(localized: "Ждём завершения предыдущей задачи…")) }
         await gate.acquire("generate")
         guard id == jobID else {
             gate.release()  // stopped while waiting
@@ -419,7 +419,7 @@ final class Studio {
         pinnedResult = nil
         phase = .idle
         jobStarted = nil
-        appendLog("Остановлено пользователем")
+        appendLog(String(localized: "Остановлено пользователем"))
         stopETA()
         if let prefix { removePartialOutputs(prefix: prefix, keeping: kept) }
     }
@@ -551,7 +551,7 @@ final class Studio {
         finalPending = false
         previewPending = false
         if status != 0 && lastError == nil {
-            lastError = "Движок завершился с ошибкой (код \(status)). Подробности — в журнале."
+            lastError = String(localized: "Движок завершился с ошибкой (код \(status)). Подробности — в журнале.")
         }
         phase = .idle
         jobStarted = nil
