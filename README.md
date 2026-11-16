@@ -49,13 +49,13 @@ SHA-256 checksums are listed in each release description. Intel Macs are not sup
 2. **Download a model.** Open **Models → Catalog**. Z-Image Turbo (4-bit) or FLUX.2 klein 4B are good first choices for 16 GB.
 3. **Generate.** Return to **Studio**, type a prompt and press **⌘↩**. **⌘.** stops instantly, **⇧⌘R** sets a new seed.
 
-To start from an existing picture, drag it onto the canvas or press **+** next to the prompt; **Source influence** in the right panel controls how much of it is kept.
+To work from existing pictures, drag them onto the canvas or press **+** next to the prompt. FLUX.2 klein, FLUX 3 klein and Qwen-Image 2.1 edit from several reference images (up to 4, 10 and 10); other models that support img2img take one picture, and **Source influence** in the right panel controls how much of it is kept.
 
 ## Models
 
 - **Catalog.** Open models with ready MLX builds (4/8-bit) from [mflux-community](https://huggingface.co/mflux-community): FLUX 3 klein, Qwen-Image 2.1, Fibo 2.0, MOSS-Image, Ming-Image, Z-Image, FLUX.2 klein, ERNIE-Image, Boogu, Iris, Anima and others, newest first. Descriptions, licenses, parameter counts and download numbers are loaded from Hugging Face.
-- **Hugging Face search.** Any repository, with filters by format (MLX build / original), architecture, bit width, compatibility and gated access. Icons on each row explain themselves on hover.
-- **Original weights with your own quantization.** The text/VL encoder and the diffusion model are quantized separately. The app suggests the best combinations for the memory of your Mac.
+- **Hugging Face search.** Ready mflux MLX builds from all of Hugging Face, including builds of fine-tuned models, with filters by architecture, bit width, compatibility and gated access. Icons on each row explain themselves on hover.
+- Each installed model shows the expected time of a standard image (1 MP, default steps) on this Mac, from separately measured load, step and decode times.
 - **Downloads** resume over HTTP Range after network errors and app restarts, one file at a time. Only the needed weights are downloaded; duplicate single-file checkpoints and repository images are skipped.
 
 ![Model catalog with descriptions, licenses and statistics from Hugging Face](docs/assets/en/catalog.png)

@@ -91,7 +91,7 @@ nonisolated enum HFClient {
 
     // MARK: Search
 
-    static func search(_ query: String, sort: String = "downloads", pipelineTag: String? = nil, limit: Int = 40) async throws -> [HFModelSummary] {
+    static func search(_ query: String, sort: String = "downloads", pipelineTag: String? = nil, tag: String? = nil, limit: Int = 40) async throws -> [HFModelSummary] {
         var components = URLComponents(url: base.appendingPathComponent("api/models"), resolvingAgainstBaseURL: false)!
         components.queryItems = [
             URLQueryItem(name: "search", value: query),
@@ -101,6 +101,7 @@ nonisolated enum HFClient {
         ] + ["downloads", "likes", "trendingScore", "gated", "lastModified", "tags", "pipeline_tag", "library_name", "safetensors"]
             .map { URLQueryItem(name: "expand[]", value: $0) }
         if let pipelineTag { components.queryItems?.append(URLQueryItem(name: "pipeline_tag", value: pipelineTag)) }
+        if let tag { components.queryItems?.append(URLQueryItem(name: "filter", value: tag)) }
         let data = try await get(components.url!)
         return try JSONDecoder().decode([HFModelSummary].self, from: data)
     }

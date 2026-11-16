@@ -80,12 +80,23 @@ struct GenerationSettings: Codable, Equatable {
     var seed = Int.random(in: 1...999_999_999)
     var randomSeed = true
     var guidance: Double?  // nil = model default
+    /// First attached image (also the img2img source); the rest are extra references.
     var initImagePath: String?
+    var extraImagePaths: [String]?
     var strength = 0.4
     var memoryMode: MemoryMode = .auto
     var precision: Precision = .auto
     var previewEvery = 1  // 0 = off
     var previewFull = false
+
+    /// All attached images in order.
+    var imagePaths: [String] {
+        get { (initImagePath.map { [$0] } ?? []) + (extraImagePaths ?? []) }
+        set {
+            initImagePath = newValue.first
+            extraImagePaths = newValue.count > 1 ? Array(newValue.dropFirst()) : nil
+        }
+    }
 
     private static let key = "generationSettings.v1"
 
@@ -124,7 +135,10 @@ nonisolated struct GenerationRecord: Codable, Hashable {
     var seed: Int
     var guidance: Double?
     var initImagePath: String?
+    var extraImagePaths: [String]?
     var strength: Double?
     var seconds: Double?
     var date: Date
+
+    var imagePaths: [String] { (initImagePath.map { [$0] } ?? []) + (extraImagePaths ?? []) }
 }

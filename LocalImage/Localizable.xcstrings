@@ -14,17 +14,6 @@
         }
       }
     },
-    "\" xml:space=\"preserve\">\n        <source/>\n        <note/>\n      </trans-unit>\n      <trans-unit id=" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ GB"
-          }
-        }
-      }
-    },
     "/с" : {
       "localizations" : {
         "en" : {
@@ -51,16 +40,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ of %2$@"
-          }
-        }
-      }
-    },
-    "%@ на диске" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ on disk"
           }
         }
       }
@@ -135,16 +114,6 @@
         }
       }
     },
-    "%lld бит" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld-bit"
-          }
-        }
-      }
-    },
     "%lld ГБ памяти" : {
       "localizations" : {
         "en" : {
@@ -205,36 +174,6 @@
         }
       }
     },
-    "Модель Bria AI на 8 млрд параметров с VL-энкодером на 4 млрд, обученная только на лицензированных изображениях. Точно следует подробным структурированным описаниям. Некоммерческая лицензия CC BY-NC 4.0. Оригинал требует принять лицензию на Hugging Face; готовые сборки доступны сразу." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "An 8B-parameter Bria AI model with a 4B VL encoder, trained only on licensed images. It follows detailed, structured descriptions closely. Non-commercial CC BY-NC 4.0 license. The original requires accepting a license on Hugging Face; the ready-made builds are available right away."
-          }
-        }
-      }
-    },
-    "Модель inclusionAI на 6 млрд параметров для интерфейсов, инфографики, постеров и другого дизайна с большим количеством текста. Умеет PNG с прозрачным фоном. Мультимодальный энкодер на 16 млрд большой, но выгружается до начала рисования. Лицензия MIT." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A 6B-parameter inclusionAI model for interfaces, infographics, posters and other text-heavy design. It can output PNGs with a transparent background. The 16B multimodal encoder is large but is unloaded before drawing starts. MIT license."
-          }
-        }
-      }
-    },
-    "Недистиллированная версия FLUX 3 Image klein: 5.6 млрд параметров и энкодер на 4 млрд. Больше шагов, зато поддерживает guidance и лучше подходит для дообучения LoRA. Оригинал требует принять лицензию на Hugging Face; готовые сборки доступны сразу." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The undistilled version of FLUX 3 Image klein: 5.6B parameters and a 4B encoder. It needs more steps but supports guidance and is better suited for LoRA training. The original requires accepting a license on Hugging Face; the ready-made builds are available right away."
-          }
-        }
-      }
-    },
     "≈ %@" : {
       "localizations" : {
         "en" : {
@@ -285,12 +224,12 @@
         }
       }
     },
-    "16 ГБ: лучший выбор — Z-Image Turbo, FLUX.2 klein 4B, FLUX 3 klein и Qwen-Image 2.1 Turbo. Для изображения берите 8 бит, если влезает, текстовый энкодер — 4–8 бит. Модели на 12–20 млрд параметров работают только в 4 битах и на умеренных разрешениях." : {
+    "16 ГБ: лучший выбор — Z-Image Turbo, FLUX.2 klein 4B, FLUX 3 klein и Qwen-Image 2.1 Turbo. Берите 8-битную сборку, если она помещается, иначе 4-битную. Модели на 12–20 млрд параметров работают только в 4 битах и на умеренных разрешениях." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "16 GB: the best choices are Z-Image Turbo, FLUX.2 klein 4B, FLUX 3 klein and Qwen-Image 2.1 Turbo. Use 8 bits for the image model if it fits and 4–8 bits for the text encoder. Models with 12–20B parameters only work at 4 bits and moderate resolutions."
+            "value" : "16 GB: the best choices are Z-Image Turbo, FLUX.2 klein 4B, FLUX 3 klein and Qwen-Image 2.1 Turbo. Take the 8-bit build if it fits, otherwise the 4-bit one. Models with 12–20B parameters only work at 4 bits and moderate resolutions."
           }
         }
       }
@@ -455,32 +394,12 @@
         }
       }
     },
-    "MLX-сборки" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "MLX builds"
-          }
-        }
-      }
-    },
     "Seed" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seed"
-          }
-        }
-      }
-    },
-    "T%lld · I%lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "T%1$lld · I%2$lld"
           }
         }
       }
@@ -635,16 +554,6 @@
         }
       }
     },
-    "Влияние %@ · меняется в параметрах" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Influence %@ · change it in the parameters"
-          }
-        }
-      }
-    },
     "Влияние исходника" : {
       "localizations" : {
         "en" : {
@@ -665,12 +574,12 @@
         }
       }
     },
-    "Впритык: возможна подкачка и замедление. Помогут меньшее качество, режим «Экономия» или более сильное квантование." : {
+    "Впритык: возможна подкачка и замедление. Помогут меньшее качество, режим «Экономия» или сборка с меньшей битностью." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tight: swapping and slowdowns are possible. A lower quality, the Saver memory mode or stronger quantization will help."
+            "value" : "Tight: swapping and slowdowns are possible. A lower quality, Saver mode or a lower-bit build will help."
           }
         }
       }
@@ -701,16 +610,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "All images are saved to %@ together with their generation parameters."
-          }
-        }
-      }
-    },
-    "Все форматы" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All formats"
           }
         }
       }
@@ -825,16 +724,6 @@
         }
       }
     },
-    "Готовая сборка — уже квантованные MLX-веса: скачивается меньше, работает сразу.\n\nОригинал — полные веса с Hugging Face, которые приложение квантует само. Так можно задать разную битность для текстового/VL-энкодера и для диффузионной части и получить лучшее качество в рамках памяти этого Mac." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ready-made build — MLX weights that are already quantized: smaller download, works right away.\n\nOriginal — full weights from Hugging Face that the app quantizes itself. This lets you set different bit widths for the text/VL encoder and the diffusion model and get the best quality within this Mac's memory."
-          }
-        }
-      }
-    },
     "Готовая сборка · %@" : {
       "localizations" : {
         "en" : {
@@ -845,22 +734,32 @@
         }
       }
     },
-    "Готовая сборка или оригинал" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ready-made build or original"
-          }
-        }
-      }
-    },
     "Готово" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Done"
+          }
+        }
+      }
+    },
+    "Готовые сборки" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready-made builds"
+          }
+        }
+      }
+    },
+    "Готовые сборки — уже квантованные MLX-веса: скачиваются меньше и работают сразу. Меньше бит — меньше памяти и чуть меньше деталей; рекомендуем лучшую сборку, которая помещается в память этого Mac." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready-made builds are already quantized MLX weights: smaller downloads that work right away. Fewer bits use less memory and keep slightly less detail; we recommend the best build that fits this Mac's memory."
           }
         }
       }
@@ -951,16 +850,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "For “%@”"
-          }
-        }
-      }
-    },
-    "Если включено, исходные веса остаются на диске и позже можно пересобрать модель с другим квантованием без повторной загрузки. Иначе после оптимизации они удаляются, освобождая место." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "If enabled, the original weights stay on disk, so you can rebuild the model with different quantization later without downloading it again. Otherwise they are deleted after optimization to free up space."
           }
         }
       }
@@ -1095,12 +984,12 @@
         }
       }
     },
-    "Заменить исходное изображение" : {
+    "Заменить изображение" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Replace source image"
+            "value" : "Replace the image"
           }
         }
       }
@@ -1165,26 +1054,6 @@
         }
       }
     },
-    "Измеренная скорость на этом Mac: %@ с на шаг при 1 МП" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Measured speed on this Mac: %@ s per step at 1 MP"
-          }
-        }
-      }
-    },
-    "Изображение (диффузия)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Image (diffusion)"
-          }
-        }
-      }
-    },
     "Изображение %lld/%lld" : {
       "localizations" : {
         "en" : {
@@ -1205,16 +1074,6 @@
         }
       }
     },
-    "Использовать как исходник" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use as source"
-          }
-        }
-      }
-    },
     "Исх." : {
       "localizations" : {
         "en" : {
@@ -1231,16 +1090,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Source"
-          }
-        }
-      }
-    },
-    "Исходное изображение" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Source image"
           }
         }
       }
@@ -1351,16 +1200,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quantization failed (code %d)"
-          }
-        }
-      }
-    },
-    "Квантование: диффузионная часть сильнее влияет на качество, чем текстовый/VL-энкодер, а энкодер выгружается до начала рисования — поэтому лучшие сочетания обычно «энкодер 4–6 бит + изображение 8 бит»." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quantization: the diffusion model affects quality more than the text/VL encoder, and the encoder is unloaded before drawing starts — so the best combinations are usually “4–6-bit encoder + 8-bit image”."
           }
         }
       }
@@ -1495,16 +1334,6 @@
         }
       }
     },
-    "Лучшие сочетания" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Best combinations"
-          }
-        }
-      }
-    },
     "Любая архитектура" : {
       "localizations" : {
         "en" : {
@@ -1635,6 +1464,26 @@
         }
       }
     },
+    "Модель Bria AI на 8 млрд параметров с VL-энкодером на 4 млрд, обученная только на лицензированных изображениях. Точно следует подробным структурированным описаниям. Некоммерческая лицензия CC BY-NC 4.0. Оригинал требует принять лицензию на Hugging Face; готовые сборки доступны сразу." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An 8B-parameter Bria AI model with a 4B VL encoder, trained only on licensed images. It follows detailed, structured descriptions closely. Non-commercial CC BY-NC 4.0 license. The original requires accepting a license on Hugging Face; the ready-made builds are available right away."
+          }
+        }
+      }
+    },
+    "Модель inclusionAI на 6 млрд параметров для интерфейсов, инфографики, постеров и другого дизайна с большим количеством текста. Умеет PNG с прозрачным фоном. Мультимодальный энкодер на 16 млрд большой, но выгружается до начала рисования. Лицензия MIT." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A 6B-parameter inclusionAI model for interfaces, infographics, posters and other text-heavy design. It can output PNGs with a transparent background. The 16B multimodal encoder is large but is unloaded before drawing starts. MIT license."
+          }
+        }
+      }
+    },
     "Модель OpenMOSS на 5 млрд параметров. Лицензия Apache 2.0." : {
       "localizations" : {
         "en" : {
@@ -1675,16 +1524,6 @@
         }
       }
     },
-    "Модель не поддерживает img2img" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The model doesn't support img2img"
-          }
-        }
-      }
-    },
     "Модель нельзя сменить во время генерации" : {
       "localizations" : {
         "en" : {
@@ -1705,12 +1544,12 @@
         }
       }
     },
-    "На этом Mac GPU может держать ≈ %@ без подкачки — это главный ориентир при выборе модели и квантования." : {
+    "На этом Mac GPU может держать ≈ %@ без подкачки — это главный ориентир при выборе модели и её сборки." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This Mac's GPU can hold ≈ %@ without swapping — the main guide when choosing a model and quantization."
+            "value" : "This Mac's GPU can hold ≈ %@ without swapping. That is the main guide when choosing a model and its build."
           }
         }
       }
@@ -1725,12 +1564,12 @@
         }
       }
     },
-    "Насколько результат похож на исходное изображение. 0.2–0.4 — сохранить композицию и цвета, перерисовав детали; 0.6–0.8 — лёгкая доработка. Часть первых шагов пропускается, поэтому генерация быстрее." : {
+    "Насколько результат похож на прикреплённое изображение. 0.2–0.4 — сохранить композицию и цвета, перерисовав детали; 0.6–0.8 — лёгкая доработка. Часть первых шагов пропускается, поэтому генерация быстрее." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "How closely the result follows the source image. 0.2–0.4 keeps composition and colors while redrawing details; 0.6–0.8 is a light touch-up. The first steps are skipped, so generation is faster."
+            "value" : "How closely the result follows the attached image. 0.2–0.4 keeps the composition and colors and redraws the details; 0.6–0.8 is a light touch-up. Some of the first steps are skipped, so generation is faster."
           }
         }
       }
@@ -1865,6 +1704,16 @@
         }
       }
     },
+    "Недистиллированная версия FLUX 3 Image klein: 5.6 млрд параметров и энкодер на 4 млрд. Больше шагов, зато поддерживает guidance и лучше подходит для дообучения LoRA. Оригинал требует принять лицензию на Hugging Face; готовые сборки доступны сразу." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The undistilled version of FLUX 3 Image klein: 5.6B parameters and a 4B encoder. It needs more steps but supports guidance and is better suited for LoRA training. The original requires accepting a license on Hugging Face; the ready-made builds are available right away."
+          }
+        }
+      }
+    },
     "Недистиллированная версия FLUX.2 klein 4B: больше шагов, поддерживает guidance. Лицензия Apache 2.0." : {
       "localizations" : {
         "en" : {
@@ -1885,12 +1734,12 @@
         }
       }
     },
-    "Необязателен. Нужен для закрытых (gated) моделей — например, оригинальных FLUX — и повышает лимиты скачивания. Подойдёт токен с правом Read (huggingface.co → Settings → Access Tokens).\n\nСохраняется и проверяется автоматически при вводе. Хранится в файле ~/Library/Application Support/LocalImage/hf_token, доступном только вашему пользователю, и передаётся только на huggingface.co." : {
+    "Необязателен. Нужен для закрытых (gated) репозиториев и повышает лимиты скачивания. Подойдёт токен с правом Read (huggingface.co → Settings → Access Tokens).\n\nСохраняется и проверяется автоматически при вводе. Хранится в файле ~/Library/Application Support/LocalImage/hf_token, доступном только вашему пользователю, и передаётся только на huggingface.co." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Optional. Needed for gated models — for example, the original FLUX — and raises download limits. A token with Read access works (huggingface.co → Settings → Access Tokens).\n\nSaved and checked automatically as you type. Stored in ~/Library/Application Support/LocalImage/hf_token, readable only by your user, and sent only to huggingface.co."
+            "value" : "Optional. Needed for gated repositories and raises download limits. A token with Read access works (huggingface.co → Settings → Access Tokens).\n\nIt is saved and checked automatically as you type. It is stored in ~/Library/Application Support/LocalImage/hf_token, readable only by your user, and is sent only to huggingface.co."
           }
         }
       }
@@ -2055,26 +1904,6 @@
         }
       }
     },
-    "Оригинал + своё квантование" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Original + your own quantization"
-          }
-        }
-      }
-    },
-    "Оригиналы" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Originals"
-          }
-        }
-      }
-    },
     "Оставшееся время: учитывает загрузку модели, текущий шаг, оставшиеся шаги, декодирование и остальные картинки серии" : {
       "localizations" : {
         "en" : {
@@ -2215,12 +2044,12 @@
         }
       }
     },
-    "Памяти достаточно для любых моделей в 8 битах или без квантования." : {
+    "Памяти достаточно для любых моделей в 8-битных сборках и даже в BF16." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enough memory for any model at 8 bits or unquantized."
+            "value" : "There is enough memory for any model in 8-bit builds and even in BF16."
           }
         }
       }
@@ -2425,16 +2254,6 @@
         }
       }
     },
-    "Подобрано под %lld ГБ этого Mac: максимум качества, при котором пик памяти остаётся в бюджете GPU. Энкодер выгружается до начала рисования, поэтому его битность влияет на пик меньше, чем битность диффузионной части." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Picked for this Mac's %lld GB: the highest quality that keeps the memory peak within the GPU budget. The encoder is unloaded before drawing starts, so its bit width affects the peak less than the diffusion model's."
-          }
-        }
-      }
-    },
     "Подробнее" : {
       "localizations" : {
         "en" : {
@@ -2455,6 +2274,16 @@
         }
       }
     },
+    "Поиск готовых MLX-сборок mflux по всему Hugging Face, включая сборки дообученных моделей. Модели из каталога находятся и по имени оригинала. Можно ввести точное имя «org/repo» и нажать ↩.\n\nСовместимыми считаются сборки, архитектуру которых знает движок. Наведите на значки справа в строке, чтобы увидеть, что они значат." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Searches all of Hugging Face for ready mflux MLX builds, including builds of fine-tuned models. Catalog models are also found by their original name. You can type an exact \"org/repo\" name and press ↩.\n\nBuilds count as compatible when the engine knows their architecture. Hover over the icons on the right of a row to see what they mean."
+          }
+        }
+      }
+    },
     "Поиск моделей или org/repo" : {
       "localizations" : {
         "en" : {
@@ -2471,16 +2300,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Search on Hugging Face"
-          }
-        }
-      }
-    },
-    "Поиск по всему Hugging Face. Пустой запрос показывает MLX-сборки и модели text-to-image. Можно ввести точное имя «org/repo» и нажать ↩.\n\nСовместимыми считаются репозитории, архитектуру которых знает движок: оригиналы в формате diffusers, их дообучения и готовые MLX-сборки mflux. Наведите на значки справа в строке, чтобы увидеть, что они значат." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Searches all of Hugging Face. An empty query shows MLX builds and text-to-image models. You can type an exact “org/repo” and press ↩.\n\nCompatible repositories are those whose architecture the engine knows: originals in diffusers format, their fine-tunes and ready-made mflux MLX builds. Hover over the icons on the right of a row to see what they mean."
           }
         }
       }
@@ -2525,16 +2344,6 @@
         }
       }
     },
-    "Понимает промпт (%@). Хорошо переносит квантование: 4–6 бит почти не влияют на результат, 8 — практически без потерь." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Understands the prompt (%@). Handles quantization well: 4–6 bits barely affect the result, 8 is nearly lossless."
-          }
-        }
-      }
-    },
     "Популярные" : {
       "localizations" : {
         "en" : {
@@ -2575,12 +2384,62 @@
         }
       }
     },
-    "Прикрепить исходное изображение (img2img) — или перетащите его на холст" : {
+    "Прикрепить изображение" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Attach a source image (img2img) — or drag it onto the canvas"
+            "value" : "Attach an image"
+          }
+        }
+      }
+    },
+    "Прикрепить изображение — или перетащите его на холст" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attach an image, or drag it onto the canvas"
+          }
+        }
+      }
+    },
+    "Прикрепить изображения" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attach images"
+          }
+        }
+      }
+    },
+    "Прикрепить изображения (до %lld) — или перетащите их на холст" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attach images (up to %lld), or drag them onto the canvas"
+          }
+        }
+      }
+    },
+    "Прикрепить к запросу" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attach to prompt"
+          }
+        }
+      }
+    },
+    "Прикреплено максимум для этой модели: %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This model takes at most %lld images"
           }
         }
       }
@@ -2625,16 +2484,6 @@
         }
       }
     },
-    "Раздельное квантование текстового/VL-энкодера и диффузионной части" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Separate quantization of text/VL encoder and diffusion part"
-          }
-        }
-      }
-    },
     "Размер" : {
       "localizations" : {
         "en" : {
@@ -2675,6 +2524,16 @@
         }
       }
     },
+    "Редактирует по прикреплённым изображениям: до %lld шт." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edits from attached images: up to %lld"
+          }
+        }
+      }
+    },
     "Результаты" : {
       "localizations" : {
         "en" : {
@@ -2711,16 +2570,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Drawing"
-          }
-        }
-      }
-    },
-    "Рисует изображение — именно здесь квантование заметнее всего: 8 бит ≈ оригинал, 6 — очень близко, 4 — небольшая потеря мелких деталей, 3 — заметная." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Draws the image — this is where quantization shows the most: 8 bits ≈ original, 6 very close, 4 a slight loss of fine detail, 3 noticeable."
           }
         }
       }
@@ -2985,6 +2834,16 @@
         }
       }
     },
+    "Стандартное изображение (1 МП, %lld шагов) на этом Mac: загрузка и промпт ≈ %@, шаги ≈ %@ (%@ с на шаг), декодирование ≈ %@. Оценка по замерам прошлых генераций." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A standard image (1 MP, %lld steps) on this Mac: loading and prompt ≈ %@, steps ≈ %@ (%@ s per step), decoding ≈ %@. Estimated from past generations."
+          }
+        }
+      }
+    },
     "Студия" : {
       "localizations" : {
         "en" : {
@@ -3011,16 +2870,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Text %1$@ · image %2$@ · ↓ %3$@"
-          }
-        }
-      }
-    },
-    "Текстовый / VL-энкодер" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Text / VL encoder"
           }
         }
       }
@@ -3095,12 +2944,12 @@
         }
       }
     },
-    "Убрать исходное изображение" : {
+    "Убрать изображение" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Remove source image"
+            "value" : "Remove the image"
           }
         }
       }
@@ -3225,16 +3074,6 @@
         }
       }
     },
-    "Хранить оригинальные веса" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep original weights"
-          }
-        }
-      }
-    },
     "Чего не должно быть на изображении. Работает только у моделей, которые его поддерживают." : {
       "localizations" : {
         "en" : {
@@ -3315,12 +3154,22 @@
         }
       }
     },
-    "Эта модель не поддерживает img2img — исходник будет проигнорирован." : {
+    "Эта модель рисует только по тексту" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This model does not support img2img — the source will be ignored."
+            "value" : "This model draws from text only"
+          }
+        }
+      }
+    },
+    "Это оригинальные веса, а приложение скачивает только готовые MLX-сборки. Найдите сборку этой модели в поиске — у них значок битности." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "These are original weights, and the app downloads only ready MLX builds. Find a build of this model in search: builds have a bit-width badge."
           }
         }
       }

@@ -45,16 +45,11 @@ struct StudioInspector: View {
                 Text("Кадр")
             }
 
-            if studio.initImage != nil {
+            if studio.initImage != nil, studio.usesImg2img {
                 SwiftUI.Section {
-                    if caps?.img2img == false {
-                        Label("Эта модель не поддерживает img2img — исходник будет проигнорирован.", systemImage: "exclamationmark.triangle")
-                            .font(.caption)
-                            .foregroundStyle(.orange)
-                    }
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            LabelWithInfo("Влияние исходника", info: "Насколько результат похож на исходное изображение. 0.2–0.4 — сохранить композицию и цвета, перерисовав детали; 0.6–0.8 — лёгкая доработка. Часть первых шагов пропускается, поэтому генерация быстрее.")
+                            LabelWithInfo("Влияние исходника", info: "Насколько результат похож на прикреплённое изображение. 0.2–0.4 — сохранить композицию и цвета, перерисовав детали; 0.6–0.8 — лёгкая доработка. Часть первых шагов пропускается, поэтому генерация быстрее.")
                             Spacer()
                             Text(String(format: "%.2f", studio.settings.strength)).monospacedDigit().foregroundStyle(.secondary)
                         }
@@ -63,8 +58,6 @@ struct StudioInspector: View {
                                in: 0.05...0.95)
                             .labelsHidden()
                     }
-                } header: {
-                    Text("Исходное изображение")
                 }
             }
         }
@@ -110,7 +103,7 @@ struct StudioInspector: View {
         ]
         switch fit {
         case .comfortable: break
-        case .tight: parts.append(String(localized: "Впритык: возможна подкачка и замедление. Помогут меньшее качество, режим «Экономия» или более сильное квантование."))
+        case .tight: parts.append(String(localized: "Впритык: возможна подкачка и замедление. Помогут меньшее качество, режим «Экономия» или сборка с меньшей битностью."))
         case .tooBig: parts.append(String(localized: "Скорее всего не хватит памяти. Уменьшите качество или выберите сборку с меньшей битностью."))
         }
         if studio.estimatedSeconds != nil {

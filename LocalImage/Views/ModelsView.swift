@@ -92,18 +92,17 @@ private struct HardwareStrip: View {
 
     private func hardwareAdvice(_ hw: Hardware) -> String {
         var lines: [String] = []
-        lines.append(String(localized: "На этом Mac GPU может держать ≈ \(Format.gb(hw.budgetGB)) без подкачки — это главный ориентир при выборе модели и квантования."))
+        lines.append(String(localized: "На этом Mac GPU может держать ≈ \(Format.gb(hw.budgetGB)) без подкачки — это главный ориентир при выборе модели и её сборки."))
         if hw.memoryGB <= 18 {
-            lines.append(String(localized: "16 ГБ: лучший выбор — Z-Image Turbo, FLUX.2 klein 4B, FLUX 3 klein и Qwen-Image 2.1 Turbo. Для изображения берите 8 бит, если влезает, текстовый энкодер — 4–8 бит. Модели на 12–20 млрд параметров работают только в 4 битах и на умеренных разрешениях."))
+            lines.append(String(localized: "16 ГБ: лучший выбор — Z-Image Turbo, FLUX.2 klein 4B, FLUX 3 klein и Qwen-Image 2.1 Turbo. Берите 8-битную сборку, если она помещается, иначе 4-битную. Модели на 12–20 млрд параметров работают только в 4 битах и на умеренных разрешениях."))
         } else if hw.memoryGB <= 36 {
             lines.append(String(localized: "24–36 ГБ: комфортно работают все модели до 12 млрд в 8 битах; Qwen-Image 20B — в 4–6 битах."))
         } else {
-            lines.append(String(localized: "Памяти достаточно для любых моделей в 8 битах или без квантования."))
+            lines.append(String(localized: "Памяти достаточно для любых моделей в 8-битных сборках и даже в BF16."))
         }
         if hw.prefersFloat16 {
             lines.append(String(localized: "Чип \(hw.chip.replacingOccurrences(of: "Apple ", with: "")) медленно работает с bfloat16, поэтому приложение автоматически считает в float16 там, где модель это поддерживает (≈ +25% скорости)."))
         }
-        lines.append(String(localized: "Квантование: диффузионная часть сильнее влияет на качество, чем текстовый/VL-энкодер, а энкодер выгружается до начала рисования — поэтому лучшие сочетания обычно «энкодер 4–6 бит + изображение 8 бит»."))
         return lines.joined(separator: "\n\n")
     }
 }
@@ -220,15 +219,22 @@ private struct InstalledRow: View {
         }
     }
 
+    private func timeHelp(_ time: TimeEstimate) -> LocalizedStringResource {
+        let load = Format.duration(time.load), denoise = Format.duration(time.denoise), decode = Format.duration(time.decode)
+        let perStep = String(format: "%.1f", time.perStep)
+        return "Стандартное изображение (1 МП, \(time.steps) шагов) на этом Mac: загрузка и промпт ≈ \(load), шаги ≈ \(denoise) (\(perStep) с на шаг), декодирование ≈ \(decode). Оценка по замерам прошлых генераций."
+    }
+
     @ViewBuilder
     private var status: some View {
         let progress = store.progress[model.id]
         switch model.status {
         case .ready:
             HStack(spacing: 12) {
-                if let rate = model.secondsPerStepPerMP {
-                    HintIcon(symbol: "speedometer", help: "Измеренная скорость на этом Mac: \(String(format: "%.1f", rate)) с на шаг при 1 МП",
-                             text: String(localized: "\(String(format: "%.1f", rate)) с"))
+                // One standard image (1 MP) at the model's default steps, from the phases measured on this Mac.
+                let steps = engine.caps(for: model.family)?.defaultSteps ?? 20
+                if let time = model.timeEstimate(steps: steps, megapixels: Quality.standard.megapixels) {
+                    HintIcon(symbol: "timer", help: timeHelp(time), text: "≈ " + Format.duration(time.total))
                 }
                 let peak = MemoryModel.peakGB(model.footprint)
                 FitBadge(fit: MemoryModel.fit(peak: peak), peak: peak)
@@ -364,6 +370,9 @@ struct ModelBadges: View {
                 HintIcon(symbol: "checkmark.seal.fill", help: "Совместима с движком: архитектура «\(Catalog.title(for: family))»", tint: .accentColor)
             } else {
                 HintIcon(symbol: "questionmark.diamond", help: "Архитектура не распознана — выбрать её можно вручную при скачивании", tint: .orange)
+            }
+            if let references = caps?.references, references > 0 {
+                HintIcon(symbol: "photo.stack", help: "Редактирует по прикреплённым изображениям: до \(references) шт.")
             }
             if caps?.img2img == true {
                 HintIcon(symbol: "photo.on.rectangle.angled", help: "Поддерживает img2img: генерация по исходному изображению")
@@ -529,18 +538,6 @@ enum HubSort: String, CaseIterable, Identifiable {
     }
 }
 
-enum HubFormat: String, CaseIterable, Identifiable {
-    case all, mlx, original
-    var id: String { rawValue }
-    var title: String {
-        switch self {
-        case .all: String(localized: "Все форматы")
-        case .mlx: String(localized: "MLX-сборки")
-        case .original: String(localized: "Оригиналы")
-        }
-    }
-}
-
 private struct HubSearch: View {
     @Environment(Engine.self) private var engine
     @Binding var target: DownloadTarget?
@@ -550,7 +547,6 @@ private struct HubSearch: View {
     @State private var error: String?
     @State private var searchTask: Task<Void, Never>?
     @AppStorage("hub.sort") private var sort: HubSort = .trending
-    @AppStorage("hub.format") private var format: HubFormat = .all
     @AppStorage("hub.family") private var family = ""
     @AppStorage("hub.bits") private var bits = 0          // 0 = any
     @AppStorage("hub.onlySupported") private var onlySupported = true
@@ -574,7 +570,7 @@ private struct HubSearch: View {
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .glassEffect(in: .capsule)
-                    InfoButton("Поиск по всему Hugging Face. Пустой запрос показывает MLX-сборки и модели text-to-image. Можно ввести точное имя «org/repo» и нажать ↩.\n\nСовместимыми считаются репозитории, архитектуру которых знает движок: оригиналы в формате diffusers, их дообучения и готовые MLX-сборки mflux. Наведите на значки справа в строке, чтобы увидеть, что они значат.", title: "Поиск на Hugging Face")
+                    InfoButton("Поиск готовых MLX-сборок mflux по всему Hugging Face, включая сборки дообученных моделей. Модели из каталога находятся и по имени оригинала. Можно ввести точное имя «org/repo» и нажать ↩.\n\nСовместимыми считаются сборки, архитектуру которых знает движок. Наведите на значки справа в строке, чтобы увидеть, что они значат.", title: "Поиск на Hugging Face")
                 }
                 filterBar
             }
@@ -613,13 +609,6 @@ private struct HubSearch: View {
             } label: {
                 Label(sort.title, systemImage: sort.symbol)
             }
-            .fixedSize()
-
-            Picker("Формат", selection: $format) {
-                ForEach(HubFormat.allCases) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
             .fixedSize()
 
             Menu {
@@ -670,10 +659,9 @@ private struct HubSearch: View {
             if onlySupported && fam == nil { return false }
             if !family.isEmpty && fam != family { return false }
             if openOnly && model.isGated { return false }
-            switch format {
-            case .all: break
-            case .mlx: if mlxBits == nil { return false }
-            case .original: if mlxBits != nil { return false }
+            // Only ready MLX builds are downloaded; a catalog model's original opens its builds.
+            if mlxBits == nil && !Catalog.entries.contains(where: { $0.originalRepo.caseInsensitiveCompare(model.id) == .orderedSame }) {
+                return false
             }
             if bits != 0 {
                 guard let b = mlxBits else { return false }
@@ -703,13 +691,12 @@ private struct HubSearch: View {
             defer { loading = false }
             do {
                 var found: [HFModelSummary]
-                if text.count >= 2 {
-                    found = try await HFClient.search(text, sort: sortKey, limit: 100)
-                } else {
-                    // Empty query: MLX builds + text-to-image models, merged.
-                    async let mlx = HFClient.search("mflux", sort: sortKey, limit: 100)
-                    async let t2i = HFClient.search("", sort: sortKey, pipelineTag: "text-to-image", limit: 100)
-                    let (a, b) = try await (mlx, t2i)
+                do {
+                    // MLX builds (tagged mflux) + the matching originals, which are kept only for catalog models.
+                    async let mlx = HFClient.search(text.count >= 2 ? text : "", sort: sortKey, tag: "mflux", limit: 100)
+                    async let all = HFClient.search(text.count >= 2 ? text : "", sort: sortKey,
+                                                    pipelineTag: text.count >= 2 ? nil : "text-to-image", limit: 100)
+                    let (a, b) = try await (mlx, all)
                     var seen = Set<String>()
                     found = (a + b).filter { seen.insert($0.id).inserted }
                     found.sort { lhs, rhs in

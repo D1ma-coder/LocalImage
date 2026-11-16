@@ -10,12 +10,17 @@ nonisolated struct FamilyCaps: Codable, Hashable, Identifiable {
     var defaultGuidance: Double
     var negativePrompt: Bool
     var img2img: Bool
+    /// How many reference images the model edits from (0 = it can't); takes precedence over img2img.
+    var references: Int
     var lora: Bool
     var computePrecision: Bool
     var lowRam: Bool
     var patterns: [String]
 
     var id: String { key }
+
+    /// How many images can be attached: references for editing models, one source image for img2img.
+    var maxImages: Int { references > 0 ? references : (img2img ? 1 : 0) }
 
     /// The model actually uses a negative prompt: mflux may accept the flag, but CFG-distilled
     /// (turbo) variants without guidance never encode it. Qwen-Image 2512 always runs true CFG.
@@ -50,6 +55,8 @@ final class Engine {
     /// mflux internals are patched by the worker (previews, mixed quantization), so the version is pinned.
     static let mfluxVersion = "0.24.0"
     static let installSteps = 4
+    /// Must match the worker's ENGINE_PROTOCOL; a cached families list from another protocol is re-read.
+    static let protocolVersion = 4
 
     private(set) var state: State = .checking
     private(set) var info: EngineInfo?
@@ -69,7 +76,7 @@ final class Engine {
         if let data = try? Data(contentsOf: Paths.familiesCache),
            let cached = try? JSONDecoder().decode(EngineInfo.self, from: data),
            FileManager.default.isExecutableFile(atPath: Paths.python.path),
-           cached.mflux == Self.mfluxVersion {
+           cached.mflux == Self.mfluxVersion, cached.protocolVersion == Self.protocolVersion {
             info = cached
             state = .ready
             return

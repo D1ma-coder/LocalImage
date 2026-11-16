@@ -69,7 +69,7 @@ private struct AccountSettings: View {
             } header: {
                 HStack(spacing: 5) {
                     Text("Токен Hugging Face")
-                    InfoButton("Необязателен. Нужен для закрытых (gated) моделей — например, оригинальных FLUX — и повышает лимиты скачивания. Подойдёт токен с правом Read (huggingface.co → Settings → Access Tokens).\n\nСохраняется и проверяется автоматически при вводе. Хранится в файле ~/Library/Application Support/LocalImage/hf_token, доступном только вашему пользователю, и передаётся только на huggingface.co.")
+                    InfoButton("Необязателен. Нужен для закрытых (gated) репозиториев и повышает лимиты скачивания. Подойдёт токен с правом Read (huggingface.co → Settings → Access Tokens).\n\nСохраняется и проверяется автоматически при вводе. Хранится в файле ~/Library/Application Support/LocalImage/hf_token, доступном только вашему пользователю, и передаётся только на huggingface.co.")
                 }
             }
         }

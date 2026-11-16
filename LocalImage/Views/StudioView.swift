@@ -25,14 +25,16 @@ struct StudioView: View {
                         RoundedRectangle(cornerRadius: 20)
                             .strokeBorder(.tint, style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
                             .padding(16)
-                            .overlay(Label("Исходное изображение", systemImage: "photo.badge.plus").font(.title3))
+                            .overlay(Label(studio.maxImages > 1 ? "Прикрепить изображения" : "Прикрепить изображение",
+                                           systemImage: "photo.badge.plus").font(.title3))
                     }
                 }
                 .dropDestination(for: URL.self) { urls, _ in
-                    guard let url = urls.first(where: { UTType(filenameExtension: $0.pathExtension)?.conforms(to: .image) == true }) else { return false }
-                    studio.setInitImage(url)
+                    let images = urls.filter { UTType(filenameExtension: $0.pathExtension)?.conforms(to: .image) == true }
+                    guard !images.isEmpty, studio.maxImages > 0 else { return false }
+                    studio.addImages(images)
                     return true
-                } isTargeted: { dropTargeted = $0 }
+                } isTargeted: { dropTargeted = $0 && studio.maxImages > 0 }
             StepStrip()
             PromptBar()
                 .padding(.horizontal, 18)
@@ -392,7 +394,8 @@ struct ImageActions: View {
             }
         }
         Divider()
-        Button("Использовать как исходник") { studio.setInitImage(url) }
+        Button("Прикрепить к запросу") { studio.addImages([url]) }
+            .disabled(studio.maxImages == 0)
     }
 }
 
@@ -521,8 +524,8 @@ private struct PromptBar: View {
     var body: some View {
         @Bindable var studio = studio
         VStack(alignment: .leading, spacing: 10) {
-            if studio.initImage != nil {
-                AttachmentCard()
+            if !studio.inputImages.isEmpty {
+                AttachmentStrip()
                     .transition(.scale(scale: 0.85, anchor: .bottomLeading).combined(with: .opacity))
             }
             HStack(alignment: .bottom, spacing: 10) {
@@ -552,60 +555,65 @@ private struct PromptBar: View {
         }
         .padding(.leading, 10)
         .padding(.trailing, 8)
-        .padding(.top, studio.initImage != nil ? 10 : 8)
+        .padding(.top, studio.inputImages.isEmpty ? 8 : 10)
         .padding(.bottom, 8)
         .glassEffect(in: .rect(cornerRadius: 22))
-        .animation(.snappy(duration: 0.25), value: studio.initImage != nil)
+        .animation(.snappy(duration: 0.25), value: studio.inputImages.count)
         .frame(maxWidth: 820)
         .frame(maxWidth: .infinity)
 
     }
 }
 
-/// The attached init image, shown above the text like an attachment in modern AI chats.
-private struct AttachmentCard: View {
+/// Attached images, shown above the text like attachments in modern AI chats.
+private struct AttachmentStrip: View {
     @Environment(Studio.self) private var studio
+
+    var body: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 8) {
+                ForEach(Array(studio.inputImages.enumerated()), id: \.offset) { index, image in
+                    AttachmentThumb(image: image) { studio.removeImage(at: index) }
+                }
+            }
+            .padding(.leading, 2)
+            .padding(.vertical, 1)
+        }
+        .scrollIndicators(.never)
+    }
+}
+
+private struct AttachmentThumb: View {
+    let image: NSImage
+    let remove: () -> Void
     @State private var hovering = false
 
     var body: some View {
-        if let image = studio.initImage {
-            HStack(alignment: .bottom, spacing: 10) {
-                Image(nsImage: image)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 76, height: 76)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .strokeBorder(.white.opacity(0.12))
-                    )
-                    .overlay(alignment: .topTrailing) {
-                        Button { studio.setInitImage(nil) } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 9, weight: .bold))
-                                .frame(width: 20, height: 20)
-                                .background(.black.opacity(0.65), in: Circle())
-                                .foregroundStyle(.white)
-                        }
-                        .buttonStyle(.plain)
-                        .padding(5)
-                        .opacity(hovering ? 1 : 0.85)
-                        .help("Убрать исходное изображение")
-                    }
-                    .onHover { hovering = $0 }
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Исходное изображение")
-                        .font(.caption.weight(.medium))
-                    Text(studio.caps?.img2img == false
-                         ? String(localized: "Модель не поддерживает img2img")
-                         : String(localized: "Влияние \(String(format: "%.2f", studio.settings.strength)) · меняется в параметрах"))
-                        .font(.caption2)
-                        .foregroundStyle(studio.caps?.img2img == false ? .orange : .secondary)
+        Image(nsImage: image)
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(width: 76, height: 76)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(.white.opacity(0.12))
+            )
+            .overlay(alignment: .topTrailing) {
+                Button(action: remove) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 9, weight: .bold))
+                        .frame(width: 20, height: 20)
+                        .background(.black.opacity(0.65), in: Circle())
+                        .foregroundStyle(.white)
                 }
-                .padding(.bottom, 4)
+                .buttonStyle(.plain)
+                .padding(5)
+                .opacity(hovering ? 1 : 0.85)
+                .help("Убрать изображение")
+                .accessibilityLabel(Text("Убрать изображение"))
             }
-            .padding(.leading, 2)
-        }
+            .onHover { hovering = $0 }
+            .transition(.scale(scale: 0.85).combined(with: .opacity))
     }
 }
 
@@ -621,15 +629,26 @@ private struct AttachButton: View {
         }
         .buttonStyle(.plain)
         .foregroundStyle(.secondary)
-        .help(studio.initImage == nil
-              ? String(localized: "Прикрепить исходное изображение (img2img) — или перетащите его на холст")
-              : String(localized: "Заменить исходное изображение"))
+        .disabled(studio.maxImages == 0 || (studio.maxImages > 1 && !studio.canAttachMore))
+        .help(help)
+    }
+
+    private var help: String {
+        let limit = studio.maxImages
+        if limit == 0 { return String(localized: "Эта модель рисует только по тексту") }
+        if limit == 1 {
+            return studio.inputImages.isEmpty
+                ? String(localized: "Прикрепить изображение — или перетащите его на холст")
+                : String(localized: "Заменить изображение")
+        }
+        if !studio.canAttachMore { return String(localized: "Прикреплено максимум для этой модели: \(limit)") }
+        return String(localized: "Прикрепить изображения (до \(limit)) — или перетащите их на холст")
     }
 
     private func pick() {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.image]
-        panel.allowsMultipleSelection = false
-        if panel.runModal() == .OK, let url = panel.url { studio.setInitImage(url) }
+        panel.allowsMultipleSelection = studio.maxImages > 1
+        if panel.runModal() == .OK { studio.addImages(panel.urls) }
     }
 }

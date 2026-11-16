@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import UniformTypeIdentifiers
 import Observation
 
 nonisolated struct GalleryItem: Identifiable, Hashable {
@@ -31,10 +32,10 @@ final class Studio {
     var settings = GenerationSettings.load() {
         didSet {
             if settings.modelID != selectedModelID { selectedModelID = settings.modelID }
-            if settings.modelID != oldValue.modelID, dropsInitImage {
-                settings.initImagePath = nil
-                if settings.aspect == .source { settings.aspect = .square }
-                initImage = nil
+            if settings.modelID != oldValue.modelID, let limit = caps?.maxImages, settings.imagePaths.count > limit {
+                settings.imagePaths = Array(settings.imagePaths.prefix(limit))
+                inputImages = Array(inputImages.prefix(limit))
+                if inputImages.isEmpty, settings.aspect == .source { settings.aspect = .square }
             }
             if settings != oldValue { settings.save() }
         }
@@ -66,7 +67,9 @@ final class Studio {
     /// A finished image the user opened from the strip while the batch keeps generating.
     var pinnedResult: GalleryItem?
     var shownResult: GalleryItem?
-    var initImage: NSImage?
+    /// Attached images, in the order of `settings.imagePaths`.
+    private(set) var inputImages: [NSImage] = []
+    var initImage: NSImage? { inputImages.first }
 
     private var worker: WorkerProcess?
     /// Identifies the current job; events and exits of stopped jobs are ignored.
@@ -104,8 +107,7 @@ final class Studio {
         self.engine = engine
         self.gate = gate
         selectedModelID = settings.modelID
-        if let path = settings.initImagePath { initImage = NSImage(contentsOfFile: path) }
-        if initImage == nil { settings.initImagePath = nil }
+        loadImages(settings.imagePaths)
     }
 
     var isRunning: Bool { phase != .idle }
@@ -135,15 +137,12 @@ final class Studio {
 
     /// Expected duration from measured speed of this model on this Mac.
     var estimatedSeconds: Double? {
-        guard let model = selectedModel, let rate = model.secondsPerStepPerMP else { return nil }
-        let steps = effectiveSteps - skippedSteps
-        let perImage = rate * megapixels * Double(max(0, steps)) + (model.decodeSecondsPerMP ?? 0) * megapixels
-        return (model.loadSeconds ?? 0) + perImage * Double(settings.count)
+        selectedModel?.timeEstimate(steps: effectiveSteps - skippedSteps, megapixels: megapixels)?.batch(settings.count)
     }
 
     /// Steps mflux skips for img2img: the first int(steps × strength), at least one.
     var skippedSteps: Int {
-        guard settings.initImagePath != nil, caps?.img2img == true else { return 0 }
+        guard settings.initImagePath != nil, usesImg2img else { return 0 }
         return min(effectiveSteps - 1, max(1, Int(Double(effectiveSteps) * settings.strength.clamped(0, 1))))
     }
 
@@ -256,32 +255,64 @@ final class Studio {
 
     func clearError() { lastError = nil }
 
-    /// A model without img2img can't use a source image.
-    private var dropsInitImage: Bool { settings.initImagePath != nil && caps.map { !$0.img2img } == true }
-
-    /// Picks a model by hand; a source image the model can't use is removed, even when it is already selected.
+    /// Picks a model by hand; images beyond what the model takes are removed, even when it is already selected.
     func selectModel(_ id: String) {
         settings.modelID = id
-        if dropsInitImage { setInitImage(nil) }
+        if let limit = caps?.maxImages, inputImages.count > limit { keepImages(limit) }
     }
 
-    // MARK: Init image
+    // MARK: Attached images
 
-    func setInitImage(_ url: URL?) {
-        guard let url else {
-            initImage = nil
-            settings.initImagePath = nil
-            if settings.aspect == .source { settings.aspect = .square }
-            return
+    /// How many images the selected model takes (one until its capabilities are known).
+    var maxImages: Int { caps?.maxImages ?? 1 }
+    /// Attached images go to the edit pipeline as references.
+    var usesReferences: Bool { (caps?.references ?? 0) > 0 }
+    /// A single attached image is the img2img source, with an influence slider.
+    var usesImg2img: Bool { !usesReferences && caps?.img2img == true }
+    var canAttachMore: Bool { inputImages.count < maxImages }
+
+    /// Adds images up to the model's limit; with a one-image model the new image replaces the old one.
+    func addImages(_ urls: [URL]) {
+        let images = urls.filter { UTType(filenameExtension: $0.pathExtension)?.conforms(to: .image) == true }
+        guard !images.isEmpty, maxImages > 0 else { return }
+        var paths = maxImages == 1 ? [] : settings.imagePaths
+        for url in images where paths.count < maxImages {
+            // Keep a private copy so moving/deleting the original does not break "repeat".
+            let folder = Paths.ensure(Paths.appSupport.appendingPathComponent("inputs"))
+            let copy = folder.appendingPathComponent("\(UUID().uuidString.prefix(8))-\(url.lastPathComponent)")
+            try? FileManager.default.copyItem(at: url, to: copy)
+            let path = FileManager.default.fileExists(atPath: copy.path) ? copy : url
+            if NSImage(contentsOf: path) != nil { paths.append(path.path) }
         }
-        // Keep a private copy so moving/deleting the original does not break "repeat".
-        let folder = Paths.ensure(Paths.appSupport.appendingPathComponent("inputs"))
-        let copy = folder.appendingPathComponent("\(UUID().uuidString.prefix(8))-\(url.lastPathComponent)")
-        try? FileManager.default.copyItem(at: url, to: copy)
-        let path = FileManager.default.fileExists(atPath: copy.path) ? copy : url
-        initImage = NSImage(contentsOf: path)
-        settings.initImagePath = initImage == nil ? nil : path.path
-        if initImage != nil { settings.aspect = .source }
+        let hadImages = !inputImages.isEmpty
+        loadImages(paths)
+        if !hadImages, !inputImages.isEmpty { settings.aspect = .source }
+    }
+
+    func removeImage(at index: Int) {
+        guard inputImages.indices.contains(index) else { return }
+        var paths = settings.imagePaths
+        paths.remove(at: index)
+        loadImages(paths)
+        if inputImages.isEmpty, settings.aspect == .source { settings.aspect = .square }
+    }
+
+    func clearImages() { keepImages(0) }
+
+    private func keepImages(_ count: Int) {
+        loadImages(Array(settings.imagePaths.prefix(count)))
+        if inputImages.isEmpty, settings.aspect == .source { settings.aspect = .square }
+    }
+
+    /// Loads the files that still exist and stores exactly those paths.
+    private func loadImages(_ paths: [String]) {
+        var kept: [String] = []
+        var images: [NSImage] = []
+        for path in paths {
+            if let image = NSImage(contentsOfFile: path) { kept.append(path); images.append(image) }
+        }
+        inputImages = images
+        settings.imagePaths = kept
     }
 
     // MARK: Generate
@@ -331,7 +362,10 @@ final class Studio {
         if let steps = settings.steps { job["steps"] = steps }
         if let guidance = settings.guidance, caps.supportsGuidance { job["guidance"] = guidance }
         if caps.usesNegativePrompt, !settings.negativePrompt.isEmpty { job["negativePrompt"] = settings.negativePrompt }
-        if let path = settings.initImagePath, caps.img2img {
+        let references = caps.references > 0 ? Array(settings.imagePaths.prefix(caps.references)) : []
+        if !references.isEmpty {
+            job["referencePaths"] = references
+        } else if let path = settings.initImagePath, caps.img2img {
             job["imagePath"] = path
             job["imageStrength"] = settings.strength
         }
@@ -347,8 +381,9 @@ final class Studio {
             modelID: model.id, modelTitle: model.title, family: model.family, quant: model.quantLabel,
             width: width, height: height, steps: effectiveSteps, seed: seeds[0],
             guidance: caps.supportsGuidance ? settings.guidance : nil,
-            initImagePath: caps.img2img ? settings.initImagePath : nil,
-            strength: settings.initImagePath != nil && caps.img2img ? settings.strength : nil,
+            initImagePath: references.first ?? (caps.img2img ? settings.initImagePath : nil),
+            extraImagePaths: references.count > 1 ? Array(references.dropFirst()) : nil,
+            strength: references.isEmpty && settings.initImagePath != nil && caps.img2img ? settings.strength : nil,
             seconds: nil, date: Date())
 
         livePreview = nil
@@ -626,9 +661,9 @@ final class Studio {
             settings.seed = record.seed
             settings.randomSeed = false
         }
-        if let path = record.initImagePath, FileManager.default.fileExists(atPath: path) {
-            initImage = NSImage(contentsOfFile: path)
-            settings.initImagePath = path
+        let paths = record.imagePaths.filter { FileManager.default.fileExists(atPath: $0) }
+        if !paths.isEmpty {
+            loadImages(paths)
             settings.strength = record.strength ?? settings.strength
         }
     }

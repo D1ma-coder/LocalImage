@@ -6,6 +6,9 @@
 - Catalog: added FLUX 3 Image klein Base, Fibo 2.0 and Ming-Image Design.
 - Catalog: models whose original repo is gated are shown when a ready MLX build is open to download (FLUX 3 Image klein, FLUX.2 klein 9B, Krea 2 Turbo, FLUX.1 schnell); the lock badge stays only for models without one.
 - Model card summaries keep a leading rank such as "#1".
+- Several attached images: FLUX.2 klein (up to 4), FLUX 3 klein and Qwen-Image 2.1 (up to 10) edit from reference images; other img2img models take one. The attachment no longer has a caption, and images a newly picked model can't use are removed.
+- Installed models show the expected time of a standard image (1 MP, default steps) instead of seconds per step, from separately measured load, step and decode times.
+- Removed the "Original + your own quantization" option: models are downloaded only as ready MLX builds, and Hugging Face search lists MLX builds (and catalog models). Models quantized earlier keep working.
 
 ## 1.1.0 — 2026-11-16
 

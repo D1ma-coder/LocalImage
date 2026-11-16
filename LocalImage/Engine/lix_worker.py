@@ -24,7 +24,7 @@ import sys
 import time
 import traceback
 
-ENGINE_PROTOCOL = 3
+ENGINE_PROTOCOL = 4
 
 # ---------------------------------------------------------------- event channel
 _EVENT_FD = os.dup(1)
@@ -110,6 +110,22 @@ FAMILIES: dict[str, str] = {
     "ming-image-design": "mflux.models.ming_image.cli.ming_image_generate",
 }
 
+# Families whose checkpoints also edit from reference images: registry key -> (edit CLI module,
+# how many references it takes). With images attached these run the edit CLI instead of img2img.
+_FLUX2_EDIT = ("mflux.models.flux2.cli.flux2_edit_generate", 4)
+_FLUX3_EDIT = ("mflux.models.flux3.cli.flux3_edit_generate", 10)
+_QWEN21_EDIT = ("mflux.models.qwen21.cli.qwen21_edit_generate", 10)
+EDIT_FAMILIES: dict[str, tuple[str, int]] = {
+    "flux2-klein-4b": _FLUX2_EDIT,
+    "flux2-klein-9b": _FLUX2_EDIT,
+    "flux2-klein-base-4b": _FLUX2_EDIT,
+    "flux2-klein-base-9b": _FLUX2_EDIT,
+    "flux3-image-klein": _FLUX3_EDIT,
+    "flux3-image-klein-base": _FLUX3_EDIT,
+    "qwen-image-2.1": _QWEN21_EDIT,
+    "qwen-image-2.1-turbo": _QWEN21_EDIT,
+}
+
 
 def download_patterns(cli_module: str) -> list[str]:
     """Union of the HF allow-patterns of a family's main weight definitions."""
@@ -166,6 +182,7 @@ def cmd_families(_: dict) -> None:
                 "defaultGuidance": GUIDANCE_SCALE,
                 "negativePrompt": options.get("--negative-prompt") in ("honored", "conditional"),
                 "img2img": bool(traits.get("img2img")) and "--image" in options,
+                "references": EDIT_FAMILIES[key][1] if key in EDIT_FAMILIES else 0,
                 "lora": bool(traits.get("lora")),
                 "computePrecision": "--compute-precision" in options
                 and options.get("--compute-precision") != "ignored",
@@ -432,7 +449,9 @@ def build_generate_argv(job: dict) -> list[str]:
         argv += ["--guidance", str(job["guidance"])]
     if job.get("negativePrompt") and caps.get("negativePrompt"):
         argv += ["--negative-prompt", job["negativePrompt"]]
-    if job.get("imagePath") and caps.get("img2img"):
+    if job.get("referencePaths"):
+        argv += ["--image-paths", *job["referencePaths"]]
+    elif job.get("imagePath") and caps.get("img2img"):
         argv += ["--image", job["imagePath"], str(job.get("imageStrength", 0.4))]
     if job.get("quantize"):
         argv += ["--quantize", str(job["quantize"])]
@@ -482,6 +501,11 @@ def cmd_generate(job: dict) -> None:
     module_name = FAMILIES.get(family)
     if module_name is None:
         raise WorkerError("unsupported_family", f"Model family '{family}' is not supported", family=family)
+    if job.get("referencePaths"):
+        if family not in EDIT_FAMILIES:
+            raise WorkerError("unsupported_family", f"Model family '{family}' does not edit from references", family=family)
+        module_name, limit = EDIT_FAMILIES[family]
+        job["referencePaths"] = job["referencePaths"][:limit]
 
     if job.get("textBits") or job.get("imageBits"):
         install_mixed_quantization(job.get("textBits"), job.get("imageBits"))

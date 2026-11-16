@@ -1,6 +1,19 @@
 import Foundation
 import Observation
 
+nonisolated struct TimeEstimate {
+    var load: Double
+    var perStep: Double
+    var steps: Int
+    var decode: Double
+
+    var denoise: Double { perStep * Double(steps) }
+    /// One image including the model load.
+    var total: Double { load + denoise + decode }
+    /// A batch loads the model once.
+    func batch(_ count: Int) -> Double { load + (denoise + decode) * Double(max(1, count)) }
+}
+
 nonisolated struct InstalledModel: Codable, Identifiable, Hashable {
     enum Status: String, Codable { case queued, downloading, paused, quantizing, ready, failed }
 
@@ -25,6 +38,15 @@ nonisolated struct InstalledModel: Codable, Identifiable, Hashable {
     var loadSeconds: Double?
     var decodeSecondsPerMP: Double?
     var sizeOnDisk: Int64?
+
+    /// Expected time of one image on this Mac, phase by phase, from what was measured here:
+    /// load + prompt encoding once per run, the denoising steps, and the final VAE decode.
+    /// nil until a step speed has been measured.
+    func timeEstimate(steps: Int, megapixels: Double) -> TimeEstimate? {
+        guard let rate = secondsPerStepPerMP else { return nil }
+        return TimeEstimate(load: loadSeconds ?? 0, perStep: rate * megapixels, steps: max(0, steps),
+                            decode: (decodeSecondsPerMP ?? 0) * megapixels)
+    }
 
     var root: URL { Paths.models.appendingPathComponent(id, isDirectory: true) }
     var sourceDir: URL { root.appendingPathComponent("source", isDirectory: true) }
