@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 — 2026-11-16
 
 - Catalog: newest models first, by the release date of the original repo.
 - Catalog: added FLUX 3 Image klein Base, Fibo 2.0 and Ming-Image Design.

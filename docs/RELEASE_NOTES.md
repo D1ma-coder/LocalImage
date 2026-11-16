@@ -1,18 +1,18 @@
-LocalImage 1.1.0
+LocalImage 1.2.0
 
 ### Download
 
-- `LocalImage-v1.1.0-macos-arm64.dmg` — macOS 26 or later, Apple Silicon. Open it and drag **LocalImage** onto **Applications**.
+- `LocalImage-v1.2.0-macos-arm64.dmg` — macOS 26 or later, Apple Silicon. Open it and drag **LocalImage** onto **Applications**.
 
 The app is not signed with a Developer ID and not notarized. After copying it, run `xattr -dr com.apple.quarantine /Applications/LocalImage.app` or click **Open Anyway** in System Settings → Privacy & Security. On first launch the app installs its engine (Python 3.12 + mflux 0.24.0 through uv) into `~/Library/Application Support/LocalImage`; models are downloaded separately from Hugging Face.
 
 ### Changes
 
-- **English interface.** The app follows the system language: English or Russian. Every string, including engine errors, is localized.
-- **Disk image.** Releases are now a `.dmg` instead of a `.zip`.
-- **img2img progress.** The step counter and the remaining time count only the steps that actually run; the estimate before a run includes model loading and decoding.
-- **Stable parameters panel.** Typing, sliders and other changes no longer resize the panel or shift its content; changing a parameter no longer rebuilds the window and toolbar.
-- Smoother panel and sidebar animations, no automatic focus on the prompt when switching tabs, no progress bar under the canvas.
+- **Several reference images.** FLUX.2 klein takes up to 4 attached images, FLUX 3 klein and Qwen-Image 2.1 up to 10, and edit from them; other img2img models take one. Images a newly picked model can't use are removed.
+- **Load limit.** Settings → Load limits the GPU from 30% to 100%: the engine pauses after each step, so the Mac runs cooler and quieter. It applies to a running generation too, and time estimates account for it. A separate switch lowers the engine's CPU priority.
+- **Time of a standard image.** Installed models show the expected time of a 1 MP image at default steps, built from separately measured load, step and decode times.
+- **Catalog.** Newest models first; added FLUX 3 klein Base, Fibo 2.0 and Ming-Image Design; models with an open ready-made MLX build are shown even when the original repo is gated (FLUX 3 klein, FLUX.2 klein 9B, Krea 2 Turbo, FLUX.1 schnell).
+- **Ready builds only.** The "Original + your own quantization" option is gone: models download as ready MLX builds, and Hugging Face search lists MLX builds and catalog models. Models quantized earlier keep working.
 
 ### Quick start
 
