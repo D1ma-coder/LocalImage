@@ -53,7 +53,7 @@ To start from an existing picture, drag it onto the canvas or press **+** next t
 
 ## Models
 
-- **Catalog.** Open models with ready MLX builds (4/8-bit) from [mflux-community](https://huggingface.co/mflux-community): Z-Image, FLUX.2 klein, Qwen-Image 2.1, ERNIE-Image, Boogu, MOSS-Image, Iris, Anima and others. Descriptions, licenses, parameter counts and download numbers are loaded from Hugging Face.
+- **Catalog.** Open models with ready MLX builds (4/8-bit) from [mflux-community](https://huggingface.co/mflux-community): FLUX 3 klein, Qwen-Image 2.1, Fibo 2.0, MOSS-Image, Ming-Image, Z-Image, FLUX.2 klein, ERNIE-Image, Boogu, Iris, Anima and others, newest first. Descriptions, licenses, parameter counts and download numbers are loaded from Hugging Face.
 - **Hugging Face search.** Any repository, with filters by format (MLX build / original), architecture, bit width, compatibility and gated access. Icons on each row explain themselves on hover.
 - **Original weights with your own quantization.** The text/VL encoder and the diffusion model are quantized separately. The app suggests the best combinations for the memory of your Mac.
 - **Downloads** resume over HTTP Range after network errors and app restarts, one file at a time. Only the needed weights are downloaded; duplicate single-file checkpoints and repository images are skipped.

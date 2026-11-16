@@ -153,7 +153,9 @@ final class HFMeta {
             p = p.replacingOccurrences(of: "\\*\\*|__|`", with: "", options: .regularExpression)
             p = p.replacingOccurrences(of: "^[-*•]\\s+", with: "", options: .regularExpression)
             p = p.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression).trimmingCharacters(in: .whitespaces)
-            while let first = p.unicodeScalars.first, !CharacterSet.alphanumerics.contains(first) { p.removeFirst() }
+            // Leading emoji and bullets go; a rank like "#1" stays.
+            while let first = p.unicodeScalars.first, !CharacterSet.alphanumerics.contains(first),
+                  !(first == "#" && p.dropFirst().first?.isNumber == true) { p.removeFirst() }
             let letters = p.unicodeScalars.filter { CharacterSet.letters.contains($0) }.count
             guard p.count >= 80, letters > p.count / 2 else { continue }
             if p.count > 320, let cut = p.prefix(320).lastIndex(of: " ") { p = String(p[..<cut]) + "…" }

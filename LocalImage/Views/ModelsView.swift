@@ -391,9 +391,10 @@ private struct CatalogGrid: View {
     @Environment(HFMeta.self) private var meta
     @Binding var target: DownloadTarget?
 
-    /// Gated repos (license must be accepted on the Hub) are not offered; the live Hub flag wins over the built-in one.
+    /// Only models that can be downloaded without accepting a license: ready MLX builds are open even when
+    /// the original repo is gated. The live Hub flag wins over the built-in one.
     private var openEntries: [CatalogEntry] {
-        Catalog.entries.filter { !(meta.cards[$0.originalRepo]?.gated ?? $0.gated) }
+        Catalog.entries.filter { !$0.prebuilt.isEmpty || !(meta.cards[$0.originalRepo]?.gated ?? $0.gated) }
     }
 
     var body: some View {
@@ -485,7 +486,7 @@ private struct CatalogCard: View {
             }
             Divider().opacity(0.5)
             HStack(spacing: 8) {
-                ModelBadges(family: entry.family, caps: engine.caps(for: entry.family), prebuiltBits: nil, gated: card?.gated ?? false)
+                ModelBadges(family: entry.family, caps: engine.caps(for: entry.family), prebuiltBits: nil, gated: entry.prebuilt.isEmpty && (card?.gated ?? entry.gated))
                 Spacer(minLength: 4)
                 if let best {
                     FitBadge(fit: MemoryModel.fit(peak: best.1), peak: best.1)

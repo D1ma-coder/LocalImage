@@ -205,6 +205,36 @@
         }
       }
     },
+    "Модель Bria AI на 8 млрд параметров с VL-энкодером на 4 млрд, обученная только на лицензированных изображениях. Точно следует подробным структурированным описаниям. Некоммерческая лицензия CC BY-NC 4.0. Оригинал требует принять лицензию на Hugging Face; готовые сборки доступны сразу." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An 8B-parameter Bria AI model with a 4B VL encoder, trained only on licensed images. It follows detailed, structured descriptions closely. Non-commercial CC BY-NC 4.0 license. The original requires accepting a license on Hugging Face; the ready-made builds are available right away."
+          }
+        }
+      }
+    },
+    "Модель inclusionAI на 6 млрд параметров для интерфейсов, инфографики, постеров и другого дизайна с большим количеством текста. Умеет PNG с прозрачным фоном. Мультимодальный энкодер на 16 млрд большой, но выгружается до начала рисования. Лицензия MIT." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A 6B-parameter inclusionAI model for interfaces, infographics, posters and other text-heavy design. It can output PNGs with a transparent background. The 16B multimodal encoder is large but is unloaded before drawing starts. MIT license."
+          }
+        }
+      }
+    },
+    "Недистиллированная версия FLUX 3 Image klein: 5.6 млрд параметров и энкодер на 4 млрд. Больше шагов, зато поддерживает guidance и лучше подходит для дообучения LoRA. Оригинал требует принять лицензию на Hugging Face; готовые сборки доступны сразу." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The undistilled version of FLUX 3 Image klein: 5.6B parameters and a 4B encoder. It needs more steps but supports guidance and is better suited for LoRA training. The original requires accepting a license on Hugging Face; the ready-made builds are available right away."
+          }
+        }
+      }
+    },
     "≈ %@" : {
       "localizations" : {
         "en" : {

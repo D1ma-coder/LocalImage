@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Catalog: newest models first, by the release date of the original repo.
+- Catalog: added FLUX 3 Image klein Base, Fibo 2.0 and Ming-Image Design.
+- Catalog: models whose original repo is gated are shown when a ready MLX build is open to download (FLUX 3 Image klein, FLUX.2 klein 9B, Krea 2 Turbo, FLUX.1 schnell); the lock badge stays only for models without one.
+- Model card summaries keep a leading rank such as "#1".
+
 ## 1.1.0 — 2026-11-16
 
 - English interface. The app follows the system language: English or Russian. Every string, including errors from the engine, is localized.
