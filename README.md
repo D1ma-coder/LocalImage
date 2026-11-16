@@ -19,6 +19,10 @@ You can download any compatible model from Hugging Face inside the app as a read
 
 Every step shows an estimate of the finished image (x̂₀), not raw noise, so the composition is visible from the first step. The canvas stays slightly blurred under a loader until the image is final; a batch gets all its slots up front.
 
+The remaining time is estimated stage by stage from this Mac's own measurements: model load and encoding (longer with attached images), the steps (whose time grows with the output size and with reference images, whose tokens every step also processes), and the final decode.
+
+Resolution follows the model: **Maximum** is the largest size the model is made for, from 1 MP (Iris, ERNIE-Image) and 2K (Z-Image, FLUX.2 klein, Qwen-Image 2.1) to 4K (FLUX 3 klein).
+
 ![Live preview while a batch of three images is being generated](docs/assets/en/live-preview.png)
 
 All images are saved to `~/Pictures/LocalImage/YYYY-MM-DD/` with a `.lix.json` file next to each one. The gallery searches by prompt and repeats any image with the same or a new seed.

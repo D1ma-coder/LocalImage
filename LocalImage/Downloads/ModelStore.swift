@@ -5,13 +5,19 @@ nonisolated struct TimeEstimate {
     var load: Double
     var perStep: Double
     var steps: Int
+    /// Extra time of the run's first step.
+    var warmup: Double
     var decode: Double
+    /// From the saved image to the end of the job (the worker exits).
+    var finish: Double
 
     var denoise: Double { perStep * Double(steps) }
+    /// Decoding, saving and the worker's exit.
+    var ending: Double { decode + finish }
     /// One image including the model load.
-    var total: Double { load + denoise + decode }
-    /// A batch loads the model once.
-    func batch(_ count: Int) -> Double { load + (denoise + decode) * Double(max(1, count)) }
+    var total: Double { load + warmup + denoise + ending }
+    /// A batch loads the model and warms up once.
+    func batch(_ count: Int) -> Double { load + warmup + finish + (denoise + decode) * Double(max(1, count)) }
 }
 
 nonisolated struct InstalledModel: Codable, Identifiable, Hashable {
@@ -33,20 +39,57 @@ nonisolated struct InstalledModel: Codable, Identifiable, Hashable {
     var error: String?
     var footprint: Footprint
     var createdAt: Date
+    /// Older single-number timings: used only until the samples below exist.
     var secondsPerStepPerMP: Double?
-    /// Measured on this Mac: model load + prompt encoding, and final VAE decode per megapixel.
     var loadSeconds: Double?
     var decodeSecondsPerMP: Double?
+    /// Measured on this Mac. Steps: seconds per step at full GPU load against the megapixels the
+    /// transformer sees (output + reference images). Load: model load + prompt and image encoding
+    /// against the megapixels of attached images. Decode: final VAE decode + save against output size.
+    var stepSamples: [TimingSample]?
+    var loadSamples: [TimingSample]?
+    var decodeSamples: [TimingSample]?
+    /// Extra time of a run's first step over a steady one, and from the last saved image to the
+    /// worker's exit (the job ends only then).
+    var warmupSamples: [TimingSample]?
+    var finishSamples: [TimingSample]?
     var sizeOnDisk: Int64?
 
     /// Expected time of one image on this Mac, phase by phase, from what was measured here:
     /// load + prompt encoding once per run, the denoising steps, and the final VAE decode.
-    /// The step rate is stored at full GPU load; `load` stretches it by the Settings limit.
-    /// nil until a step speed has been measured.
-    func timeEstimate(steps: Int, megapixels: Double, load: Double = HardwareLoad.fraction) -> TimeEstimate? {
-        guard let rate = secondsPerStepPerMP else { return nil }
-        return TimeEstimate(load: loadSeconds ?? 0, perStep: rate * megapixels / max(0.1, load), steps: max(0, steps),
-                            decode: (decodeSecondsPerMP ?? 0) * megapixels)
+    /// `sequence`: output plus reference megapixels (defaults to the output alone); `images`:
+    /// megapixels of attached images to encode first. Step times are stored at full GPU load;
+    /// `load` stretches them by the Settings limit. nil until a step speed has been measured.
+    func timeEstimate(steps: Int, megapixels: Double, sequence: Double? = nil, images: Double = 0,
+                      load: Double = HardwareLoad.fraction) -> TimeEstimate? {
+        guard let perStep = stepSeconds(sequence: sequence ?? megapixels) else { return nil }
+        return TimeEstimate(load: predictedLoad(images: images) ?? 0, perStep: perStep / max(0.1, load),
+                            steps: max(0, steps), warmup: predictedWarmup(sequence: sequence ?? megapixels) ?? 0,
+                            decode: predictedDecode(megapixels: megapixels) ?? 0, finish: predictedFinish() ?? 0)
+    }
+
+    func predictedWarmup(sequence: Double) -> Double? {
+        TimingFit.power(warmupSamples, at: sequence, exponent: 1.0, range: 0.3...2.0)
+    }
+
+    func predictedFinish() -> Double? {
+        TimingFit.linear(finishSamples, at: 0, slope: 0)
+    }
+
+    /// One denoising step at full GPU load.
+    func stepSeconds(sequence: Double) -> Double? {
+        TimingFit.power(stepSamples ?? secondsPerStepPerMP.map { [TimingSample(x: 1, seconds: $0)] },
+                        at: sequence, exponent: 1.0, range: 0.6...2.0)
+    }
+
+    /// Model load + prompt encoding, plus encoding of attached images (≈ 3.5 s per megapixel until measured).
+    func predictedLoad(images: Double) -> Double? {
+        TimingFit.linear(loadSamples ?? loadSeconds.map { [TimingSample(x: 0, seconds: $0)] }, at: images, slope: 3.5)
+    }
+
+    func predictedDecode(megapixels: Double) -> Double? {
+        TimingFit.power(decodeSamples ?? decodeSecondsPerMP.map { [TimingSample(x: 1, seconds: $0)] },
+                        at: megapixels, exponent: 1.0, range: 0.7...1.5)
     }
 
     var root: URL { Paths.models.appendingPathComponent(id, isDirectory: true) }
@@ -181,28 +224,24 @@ final class ModelStore {
         }
     }
 
-    func recordTimings(_ id: String, loadSeconds: Double?, decodeSecondsPerMP: Double?) {
-        update(id) { model in
-            if let load = loadSeconds {
-                model.loadSeconds = model.loadSeconds.map { $0 * 0.6 + load * 0.4 } ?? load
-            }
-            if let decode = decodeSecondsPerMP {
-                model.decodeSecondsPerMP = model.decodeSecondsPerMP.map { $0 * 0.6 + decode * 0.4 } ?? decode
-            }
-        }
+    func recordStep(_ id: String, sequence: Double, seconds: Double) {
+        update(id) { $0.stepSamples = TimingFit.appending(TimingSample(x: sequence, seconds: seconds), to: $0.stepSamples) }
     }
 
-    func recordSpeed(_ id: String, secondsPerStepPerMP: Double) {
-        update(id) { model in
-            if let old = model.secondsPerStepPerMP {
-                // A big disagreement (stale or polluted history) is corrected quickly.
-                let ratio = max(old, secondsPerStepPerMP) / max(0.001, min(old, secondsPerStepPerMP))
-                let w = ratio > 1.5 ? 0.75 : 0.4
-                model.secondsPerStepPerMP = old * (1 - w) + secondsPerStepPerMP * w
-            } else {
-                model.secondsPerStepPerMP = secondsPerStepPerMP
-            }
-        }
+    func recordLoad(_ id: String, images: Double, seconds: Double) {
+        update(id) { $0.loadSamples = TimingFit.appending(TimingSample(x: images, seconds: seconds), to: $0.loadSamples) }
+    }
+
+    func recordWarmup(_ id: String, sequence: Double, seconds: Double) {
+        update(id) { $0.warmupSamples = TimingFit.appending(TimingSample(x: sequence, seconds: seconds), to: $0.warmupSamples) }
+    }
+
+    func recordFinish(_ id: String, seconds: Double) {
+        update(id) { $0.finishSamples = TimingFit.appending(TimingSample(x: 0, seconds: seconds), to: $0.finishSamples) }
+    }
+
+    func recordDecode(_ id: String, megapixels: Double, seconds: Double) {
+        update(id) { $0.decodeSamples = TimingFit.appending(TimingSample(x: megapixels, seconds: seconds), to: $0.decodeSamples) }
     }
 
     // MARK: Adding

@@ -222,7 +222,7 @@ private struct InstalledRow: View {
     }
 
     private func timeHelp(_ time: TimeEstimate) -> LocalizedStringResource {
-        let load = Format.duration(time.load), denoise = Format.duration(time.denoise), decode = Format.duration(time.decode)
+        let load = Format.duration(time.load), denoise = Format.duration(time.denoise + time.warmup), decode = Format.duration(time.ending)
         let perStep = String(format: "%.1f", time.perStep)
         if HardwareLoad.percent < 100 {
             return "Стандартное изображение (1 МП, \(time.steps) шагов) на этом Mac при нагрузке \(HardwareLoad.percent)%: загрузка и промпт ≈ \(load), шаги ≈ \(denoise) (\(perStep) с на шаг), декодирование ≈ \(decode). Оценка по замерам прошлых генераций."
@@ -238,7 +238,7 @@ private struct InstalledRow: View {
             HStack(spacing: 12) {
                 // One standard image (1 MP) at the model's default steps, from the phases measured on this Mac.
                 let steps = engine.caps(for: model.family)?.defaultSteps ?? 20
-                if let time = model.timeEstimate(steps: steps, megapixels: Quality.standard.megapixels) {
+                if let time = model.timeEstimate(steps: steps, megapixels: Quality.standard.megapixels(limit: Quality.defaultLimit)) {
                     HintIcon(symbol: "timer", help: timeHelp(time), text: "≈ " + Format.duration(time.total))
                 }
                 let peak = MemoryModel.peakGB(model.footprint)
@@ -375,6 +375,12 @@ struct ModelBadges: View {
                 HintIcon(symbol: "checkmark.seal.fill", help: "Совместима с движком: архитектура «\(Catalog.title(for: family))»", tint: .accentColor)
             } else {
                 HintIcon(symbol: "questionmark.diamond", help: "Архитектура не распознана — выбрать её можно вручную при скачивании", tint: .orange)
+            }
+            if let limit = caps?.maxMegapixels {
+                let side = Int((limit.squareRoot() * 1024 / 16).rounded()) * 16
+                HintIcon(symbol: "arrow.up.left.and.arrow.down.right",
+                         help: "Рисует до \(Format.resolutionClass(limit)): около \(side) × \(side) пикселей или та же площадь в другом формате",
+                         text: Format.resolutionClass(limit))
             }
             if let references = caps?.references, references > 0 {
                 HintIcon(symbol: "photo.stack", help: "Редактирует по прикреплённым изображениям: до \(references) шт.")

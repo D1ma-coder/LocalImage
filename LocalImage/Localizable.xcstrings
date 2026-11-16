@@ -586,16 +586,16 @@
     },
     "Видеочип занят %lld%% времени, генерация идёт примерно в %@ раза дольше." : {
       "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Видеочип занят %1$lld%% времени, генерация идёт примерно в %2$@ раза дольше."
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "The GPU is busy %lld%% of the time; generation takes about %@× as long."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Видеочип занят %1$lld%% времени, генерация идёт примерно в %2$@ раза дольше."
           }
         }
       }
@@ -2610,12 +2610,12 @@
         }
       }
     },
-    "Разрешение итогового изображения. Черновик ≈ 0.4 МП — для быстрых проб, Стандарт ≈ 1 МП — родное разрешение большинства моделей, Высокое и Максимум — больше деталей, но больше времени и памяти (расход растёт пропорционально площади)." : {
+    "Разрешение итогового изображения в пределах того, на что рассчитана модель. Черновик ≈ 0.4 МП — для быстрых проб, Стандарт ≈ 1 МП — родное разрешение большинства моделей. Максимум — предел самой модели (у одних 1 МП, у других 2K или 4K), Высокое — посередине. Больше разрешение — больше деталей, но больше времени и памяти." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Resolution of the final image. Draft ≈ 0.4 MP for quick tries, Standard ≈ 1 MP is the native resolution of most models, High and Maximum give more detail but take more time and memory (usage grows with the area)."
+            "value" : "Output resolution, within what the model is made for. Draft ≈ 0.4 MP is for quick tries, Standard ≈ 1 MP is the native resolution of most models. Maximum is the model's own limit (1 MP for some, 2K or 4K for others), and High lies halfway. A higher resolution gives more detail but takes more time and memory."
           }
         }
       }
@@ -2666,6 +2666,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Drawing"
+          }
+        }
+      }
+    },
+    "Рисует до %@: около %lld × %lld пикселей или та же площадь в другом формате" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Рисует до %1$@: около %2$lld × %3$lld пикселей или та же площадь в другом формате"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Draws up to %@: about %lld × %lld pixels, or the same area in another aspect ratio"
           }
         }
       }
@@ -2932,16 +2948,16 @@
     },
     "Стандартное изображение (1 МП, %lld шагов) на этом Mac при нагрузке %lld%%: загрузка и промпт ≈ %@, шаги ≈ %@ (%@ с на шаг), декодирование ≈ %@. Оценка по замерам прошлых генераций." : {
       "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Стандартное изображение (1 МП, %1$lld шагов) на этом Mac при нагрузке %2$lld%%: загрузка и промпт ≈ %3$@, шаги ≈ %4$@ (%5$@ с на шаг), декодирование ≈ %6$@. Оценка по замерам прошлых генераций."
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "A standard image (1 MP, %lld steps) on this Mac at %lld%% load: loading and prompt ≈ %@, steps ≈ %@ (%@ s per step), decoding ≈ %@. Estimated from past generations."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Стандартное изображение (1 МП, %1$lld шагов) на этом Mac при нагрузке %2$lld%%: загрузка и промпт ≈ %3$@, шаги ≈ %4$@ (%5$@ с на шаг), декодирование ≈ %6$@. Оценка по замерам прошлых генераций."
           }
         }
       }

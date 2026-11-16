@@ -12,6 +12,8 @@ nonisolated struct FamilyCaps: Codable, Hashable, Identifiable {
     var img2img: Bool
     /// How many reference images the model edits from (0 = it can't); takes precedence over img2img.
     var references: Int
+    /// Largest output the model is made for, in megapixels of 1024×1024.
+    var maxMegapixels: Double
     var lora: Bool
     var computePrecision: Bool
     var lowRam: Bool
@@ -56,7 +58,7 @@ final class Engine {
     static let mfluxVersion = "0.24.0"
     static let installSteps = 4
     /// Must match the worker's ENGINE_PROTOCOL; a cached families list from another protocol is re-read.
-    static let protocolVersion = 4
+    static let protocolVersion = 5
 
     private(set) var state: State = .checking
     private(set) var info: EngineInfo?

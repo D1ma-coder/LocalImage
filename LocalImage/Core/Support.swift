@@ -29,6 +29,13 @@ nonisolated enum TokenStore {
 // MARK: - Formatting
 
 nonisolated enum Format {
+    /// Short name of a model's largest output: «4K», «2K», or the side of the equal-area square («1536 px»).
+    static func resolutionClass(_ megapixels: Double) -> String {
+        if megapixels >= 7.5 { return "4K" }
+        if megapixels >= 3.5 { return "2K" }
+        return "\(Int((megapixels.squareRoot() * 1024 / 16).rounded()) * 16) px"
+    }
+
     static func bytes(_ value: Int64) -> String {
         ByteCountFormatter.string(fromByteCount: value, countStyle: .file)
     }

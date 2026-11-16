@@ -98,7 +98,7 @@ private struct ModelSwitcher: View {
     private func subtitle(for model: InstalledModel) -> String {
         let peak = MemoryModel.peakGB(model.footprint)
         var parts = [model.quantLabel, "≈ \(Format.gb(peak))", MemoryModel.fit(peak: peak).label.lowercased()]
-        if let rate = model.secondsPerStepPerMP { parts.append(String(localized: "\(String(format: "%.1f", rate)) с/шаг")) }
+        if let rate = model.stepSeconds(sequence: 1) { parts.append(String(localized: "\(String(format: "%.1f", rate)) с/шаг")) }
         return parts.joined(separator: " · ")
     }
 }

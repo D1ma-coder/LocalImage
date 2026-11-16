@@ -24,7 +24,7 @@ import sys
 import time
 import traceback
 
-ENGINE_PROTOCOL = 4
+ENGINE_PROTOCOL = 5
 
 # ---------------------------------------------------------------- event channel
 _EVENT_FD = os.dup(1)
@@ -110,6 +110,36 @@ FAMILIES: dict[str, str] = {
     "ming-image-design": "mflux.models.ming_image.cli.ming_image_generate",
 }
 
+# Largest output each family is made for, in megapixels of 1024×1024 (= 1.0), from the model
+# cards. The app offers resolutions up to this; families not listed get MAX_MEGAPIXELS_DEFAULT.
+MAX_MEGAPIXELS_DEFAULT = 2.3
+MAX_MEGAPIXELS: dict[str, float] = {
+    "z-image-turbo": 4.0,  # 512² … 2048² at any aspect ratio
+    "z-image": 4.0,
+    "flux2-klein-4b": 4.0,  # FLUX.2: up to 4 MP (2048×2048)
+    "flux2-klein-9b": 4.0,
+    "flux2-klein-base-4b": 4.0,
+    "flux2-klein-base-9b": 4.0,
+    "flux3-image-klein": 7.91,  # native 4K: 3840×2160 at 16:9
+    "flux3-image-klein-base": 7.91,
+    "krea-2": 4.0,  # 1K … 2K
+    "qwen-image": 1.68,  # Qwen-Image 2512 presets: 1328×1328, 1664×928 …
+    "qwen-image-2.1": 4.0,  # presets: 2048×2048, 2752×1536 …
+    "qwen-image-2.1-turbo": 4.0,
+    "schnell": 1.91,  # FLUX.1: 0.1 … 2.0 MP
+    "dev": 1.91,
+    "krea-dev": 1.91,
+    "iris-3b": 1.0,  # trained at ~1 MP buckets
+    "anima-turbo": 2.25,  # 512² … 1536²
+    "anima-aesthetic": 2.25,
+    "ernie-image-turbo": 1.0,  # presets around 1 MP: 1024², 1376×768 …
+    "ernie-image": 1.0,
+    "boogu-image-turbo": 4.0,  # 1K … 2K
+    "moss-image-sft": 1.91,  # recommended up to 2 MP
+    "fibo2": 4.0,  # up to 4 MP
+    "ming-image-design": 4.0,  # 2048×2048 recommended
+}
+
 # Families whose checkpoints also edit from reference images: registry key -> (edit CLI module,
 # how many references it takes). With images attached these run the edit CLI instead of img2img.
 _FLUX2_EDIT = ("mflux.models.flux2.cli.flux2_edit_generate", 4)
@@ -183,6 +213,7 @@ def cmd_families(_: dict) -> None:
                 "negativePrompt": options.get("--negative-prompt") in ("honored", "conditional"),
                 "img2img": bool(traits.get("img2img")) and "--image" in options,
                 "references": EDIT_FAMILIES[key][1] if key in EDIT_FAMILIES else 0,
+                "maxMegapixels": MAX_MEGAPIXELS.get(key, MAX_MEGAPIXELS_DEFAULT),
                 "lora": bool(traits.get("lora")),
                 "computePrecision": "--compute-precision" in options
                 and options.get("--compute-precision") != "ignored",

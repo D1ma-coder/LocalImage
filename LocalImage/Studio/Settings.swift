@@ -21,25 +21,47 @@ enum Aspect: String, Codable, CaseIterable, Identifiable {
     static var presets: [Aspect] { [.square, .photo, .classic, .wide, .portrait, .tall, .story] }
 }
 
+/// Output size, relative to what the selected model is made for: «Максимум» is that model's
+/// own limit (from 1 MP for Iris up to 4K for FLUX 3 klein), «Высокое» lies halfway to it.
 enum Quality: String, Codable, CaseIterable, Identifiable {
     case draft, standard, high, max
 
     var id: String { rawValue }
-    var megapixels: Double {
+
+    /// The limit used when the model's own is unknown (the old fixed «Максимум»).
+    static let defaultLimit = 2.3
+
+    /// Megapixels (1.0 = 1024×1024) for a model whose largest output is `limit`.
+    func megapixels(limit: Double) -> Double {
         switch self {
-        case .draft: 0.42
-        case .standard: 1.0
-        case .high: 1.6
-        case .max: 2.3
+        case .draft: min(0.42, limit)
+        case .standard: min(1.0, limit)
+        case .high: limit.squareRoot()  // geometric middle between 1 MP and the limit
+        case .max: limit
         }
     }
 
-    var title: String {
+    /// Levels that make sense for this limit: no «Высокое» or «Максимум» that would equal «Стандарт».
+    static func options(limit: Double) -> [Quality] {
+        var levels: [Quality] = [.draft, .standard]
+        if limit >= 1.3 { levels.append(.high) }
+        if limit >= 1.15 { levels.append(.max) }
+        return levels
+    }
+
+    /// This level if the model offers it, otherwise the nearest one below.
+    func available(limit: Double) -> Quality {
+        let levels = Self.options(limit: limit)
+        if levels.contains(self) { return self }
+        return levels.last { $0.megapixels(limit: limit) <= megapixels(limit: limit) } ?? .standard
+    }
+
+    func title(limit: Double) -> String {
         switch self {
         case .draft: String(localized: "Черновик")
         case .standard: String(localized: "Стандарт")
         case .high: String(localized: "Высокое")
-        case .max: String(localized: "Максимум")
+        case .max: limit >= 3.5 ? Format.resolutionClass(limit) : String(localized: "Максимум")
         }
     }
 }
@@ -111,9 +133,9 @@ struct GenerationSettings: Codable, Equatable {
     }
 
     /// Pixel size for the current aspect & quality (multiples of 16, as the transformers patchify 2×2 latents).
-    func dimensions(sourceAspect: Double?) -> (width: Int, height: Int) {
+    func dimensions(sourceAspect: Double?, limit: Double) -> (width: Int, height: Int) {
         let ratio = aspect == .source ? (sourceAspect ?? 1) : aspect.ratio
-        let pixels = quality.megapixels * 1_048_576
+        let pixels = quality.available(limit: limit).megapixels(limit: limit) * 1_048_576
         let width = (pixels * ratio).squareRoot()
         let height = width / ratio
         func snap(_ value: Double) -> Int { max(256, Int((value / 16).rounded()) * 16) }

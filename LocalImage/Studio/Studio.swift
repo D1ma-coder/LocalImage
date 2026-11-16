@@ -97,6 +97,11 @@ final class Studio {
     private var interImageGap: Double?
     private var lastImageDoneAt: Date?
     private var jobMegapixels = 1.0
+    /// What the transformer sees per step (output + references) and the attached images encoded before it.
+    private var jobSequence = 1.0
+    private var jobImages = 0.0
+    /// When the worker process really started (after waiting for a previous heavy job).
+    private var workerStartedAt: Date?
     private var jobModelID: String?
     private var currentRecordBase: GenerationRecord?
 
@@ -125,8 +130,11 @@ final class Studio {
 
     var dimensions: (width: Int, height: Int) {
         let sourceAspect = initImage.map { Double($0.size.width / max(1, $0.size.height)) }
-        return settings.dimensions(sourceAspect: sourceAspect)
+        return settings.dimensions(sourceAspect: sourceAspect, limit: resolutionLimit)
     }
+
+    /// Largest output of the selected model, in megapixels of 1024×1024.
+    var resolutionLimit: Double { caps?.maxMegapixels ?? Quality.defaultLimit }
 
     var megapixels: Double { Double(dimensions.width * dimensions.height) / 1_048_576 }
 
@@ -139,7 +147,27 @@ final class Studio {
 
     /// Expected duration from measured speed of this model on this Mac.
     var estimatedSeconds: Double? {
-        selectedModel?.timeEstimate(steps: effectiveSteps - skippedSteps, megapixels: megapixels)?.batch(settings.count)
+        selectedModel?.timeEstimate(steps: effectiveSteps - skippedSteps, megapixels: megapixels,
+                                    sequence: sequenceMegapixels, images: attachedMegapixels)?.batch(settings.count)
+    }
+
+    /// Attached images as the engine processes them, in megapixels of 1024×1024. References are
+    /// scaled to the edit model's budget: up to 1 MP each (a single FLUX 3 reference up to 4 MP),
+    /// Qwen-Image 2.1 always ≈ 1 MP. An img2img source is resized to the output.
+    var attachedMegapixels: Double {
+        guard let caps, !inputImages.isEmpty else { return 0 }
+        guard caps.references > 0 else { return caps.img2img ? megapixels : 0 }
+        let images = inputImages.prefix(caps.references)
+        return images.reduce(0) { sum, image in
+            if caps.key.hasPrefix("qwen-image-2.1") { return sum + 1 }
+            let cap = caps.key.hasPrefix("flux3") && images.count == 1 ? 4.0 : 1.0
+            return sum + min(image.pixelMegapixels, cap)
+        }
+    }
+
+    /// Megapixels every denoising step works on: the output plus the reference images' tokens.
+    var sequenceMegapixels: Double {
+        megapixels + ((caps?.references ?? 0) > 0 ? attachedMegapixels : 0)
     }
 
     /// Steps mflux skips for img2img: the first int(steps × strength), at least one.
@@ -159,38 +187,52 @@ final class Studio {
     private func estimateRemaining(now: Date) -> Double? {
         let model = jobModelID.flatMap { store.model($0) }
         let mp = jobMegapixels
-        // Steady-state step time; the warm-up interval only stands in until a normal step is seen.
-        guard let stepDuration = stepDurationEMA ?? model?.secondsPerStepPerMP.map({ $0 * mp / HardwareLoad.fraction }) ?? warmupInterval.map({ $0 * 0.6 }) else { return nil }
-        let decode = measuredDecode ?? model?.decodeSecondsPerMP.map { $0 * mp } ?? max(1.5, stepDuration * 0.6)
-        let load = model?.loadSeconds ?? 8
+        let warmup = model?.predictedWarmup(sequence: jobSequence) ?? 0
+        // Steady step time: this run's own steps first. Until a second step is seen, the first one
+        // minus its expected warm-up says more about this run than history does.
+        let history = model?.stepSeconds(sequence: jobSequence).map { $0 / HardwareLoad.fraction }
+        let firstStep = warmupInterval.map { max($0 - warmup, $0 * 0.5) }
+        guard let stepDuration = stepDurationEMA ?? firstStep ?? history else { return nil }
+        let decode = measuredDecode ?? model?.predictedDecode(megapixels: mp) ?? max(1.5, stepDuration * 0.6)
+        let load = model?.predictedLoad(images: jobImages) ?? 8
+        // The first step of a run is slower than the rest (kernels and caches warm up, see `warmup`);
+        // the worker exits after the last image is saved, and the job ends only then.
+        let finish = model?.predictedFinish() ?? 1
+        let gap = interImageGap ?? 0.6
         let stepsPerImage = Double(max(1, totalSteps - startStep))
+        let done = results.count
+        let sinceImage = now.timeIntervalSince(lastImageDoneAt ?? now)
         /// What is left of an activity expected to take `expected`, already running for `elapsed`.
         /// Overruns never reach zero: the estimate stretches gently instead of freezing at 0.
         func left(_ expected: Double, _ elapsed: Double) -> Double {
             elapsed < expected * 0.9 ? expected - elapsed : max(expected * 0.1, elapsed * 0.12)
         }
-        var remaining = 0.0
+        var current = 0.0  // the image being worked on
+        var working = true
         switch phase {
         case .idle:
             return nil
         case .starting, .loading, .encoding:
-            let elapsed = now.timeIntervalSince(jobStarted ?? now)
-            remaining = left(load, elapsed) + stepsPerImage * stepDuration + decode
+            // Waiting for a previous heavy job is not loading: the load clock starts with the worker.
+            let elapsed = now.timeIntervalSince(workerStartedAt ?? now)
+            current = left(load, elapsed) + warmup + stepsPerImage * stepDuration + decode
         case .denoising:
             let sinceStep = now.timeIntervalSince(lastStepAt ?? now)
+            let expected = step == startStep && done == 0 ? stepDuration + warmup : stepDuration
             let stepsAfterCurrent = Double(max(0, totalSteps - step - 1))
-            remaining = (step < totalSteps ? left(stepDuration, sinceStep) : 0) + stepsAfterCurrent * stepDuration + decode
+            current = (step < totalSteps ? left(expected, sinceStep) : 0) + stepsAfterCurrent * stepDuration + decode
         case .decoding:
-            remaining = left(decode, now.timeIntervalSince(decodeStartedAt ?? now))
+            current = left(decode, now.timeIntervalSince(decodeStartedAt ?? now))
         case .finishing:
-            remaining = 0.3
+            working = false
         }
-        let imagesAfter = Double(max(0, imageCount - imageIndex - 1))
-        if phase == .finishing && imageIndex < imageCount - 1 { remaining = 0 }
         // Later images of a batch: the real cost of the previous image beats any model.
+        let queued = Double(max(0, imageCount - done - (working ? 1 : 0)))
         let perImage = lastImageCompute ?? (stepsPerImage * stepDuration + decode)
-        remaining += imagesAfter * (perImage + (interImageGap ?? 0.6))
-        return remaining
+        var remaining = current + queued * (perImage + gap)
+        if !working && queued > 0 { remaining -= min(gap, sinceImage) }
+        remaining += !working && queued == 0 ? left(finish, sinceImage) : finish
+        return max(0, remaining)
     }
 
     /// Ticks 4×/s while generating: the countdown runs between events, and new measurements
@@ -419,6 +461,9 @@ final class Studio {
         decodeStartedAt = nil
         measuredDecode = nil
         jobMegapixels = Double(width * height) / 1_048_576
+        jobSequence = sequenceMegapixels
+        jobImages = attachedMegapixels
+        workerStartedAt = nil
         jobModelID = model.id
         startETA()
 
@@ -435,6 +480,7 @@ final class Studio {
             gate.release()  // stopped while waiting
             return
         }
+        workerStartedAt = Date()
         do {
             worker = try WorkerProcess.start(
                 command: "generate", payload: job,
@@ -523,8 +569,8 @@ final class Studio {
                 interImageGap = interImageGap.map { $0 * 0.5 + gap * 0.5 } ?? gap
             }
             // First image of the job: everything before denoising was model load + prompt encoding.
-            if imageIndex == 0, results.isEmpty, let started = jobStarted, let id = jobModelID {
-                store.recordTimings(id, loadSeconds: Date().timeIntervalSince(started), decodeSecondsPerMP: nil)
+            if imageIndex == 0, results.isEmpty, let started = workerStartedAt, let id = jobModelID {
+                store.recordLoad(id, images: jobImages, seconds: Date().timeIntervalSince(started))
             }
         case .step(let current, let total, let elapsed, let paused):
             step = current
@@ -568,7 +614,7 @@ final class Studio {
             if let started = decodeStartedAt {
                 let decode = Date().timeIntervalSince(started)
                 measuredDecode = measuredDecode.map { $0 * 0.5 + decode * 0.5 } ?? decode
-                store.recordTimings(modelID, loadSeconds: nil, decodeSecondsPerMP: decode / max(0.1, jobMegapixels))
+                store.recordDecode(modelID, megapixels: jobMegapixels, seconds: decode)
             }
             imageStartedAt = Date()
             record?.date = Date()
@@ -577,9 +623,12 @@ final class Studio {
             results.append(item)
             gallery.insert(item, at: 0)
             shownResult = item
-            if let perStep = stepComputeEMA ?? secondsPerStep, let record {
-                let mp = Double(record.width * record.height) / 1_048_576
-                store.recordSpeed(modelID, secondsPerStepPerMP: perStep / max(0.1, mp))
+            if let perStep = stepComputeEMA ?? secondsPerStep {
+                store.recordStep(modelID, sequence: jobSequence, seconds: perStep)
+            }
+            // How much longer the first step of the run took than a steady one.
+            if results.count == 1, let first = warmupInterval, let steady = stepComputeEMA {
+                store.recordWarmup(modelID, sequence: jobSequence, seconds: max(0.05, first - steady))
             }
             if let started = denoiseStarted {
                 let compute = Date().timeIntervalSince(started)
@@ -608,6 +657,9 @@ final class Studio {
         worker = nil
         finalPending = false
         previewPending = false
+        if status == 0, let saved = lastImageDoneAt, let model = jobModelID {
+            store.recordFinish(model, seconds: Date().timeIntervalSince(saved))
+        }
         if status != 0 && lastError == nil {
             lastError = String(localized: "Движок завершился с ошибкой (код \(status)). Подробности — в журнале.")
         }
@@ -692,6 +744,15 @@ extension DateFormatter {
     }()
 }
 
-extension Double {
+extension NSImage {
+    /// Pixel area of the largest bitmap in megapixels of 1024×1024 (`size` is in points).
+    var pixelMegapixels: Double {
+        let largest = representations.map { $0.pixelsWide * $0.pixelsHigh }.max() ?? 0
+        let pixels = largest > 0 ? Double(largest) : Double(size.width * size.height)
+        return pixels / 1_048_576
+    }
+}
+
+nonisolated extension Double {
     func clamped(_ low: Double, _ high: Double) -> Double { Swift.min(high, Swift.max(low, self)) }
 }

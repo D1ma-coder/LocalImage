@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Resolution follows the model: «Maximum» is the model's own limit, from 1 MP (Iris, ERNIE-Image) through 2K (Z-Image, FLUX.2 klein, Krea 2, Qwen-Image 2.1, Boogu, Fibo 2.0, Ming-Image) to 4K (FLUX 3 klein); «High» lies halfway, and levels a model can't reach are hidden. Model badges show the limit.
+- Time estimates learn each stage from samples of its own size instead of one rate per model: steps against the output plus reference megapixels (references add tokens to every step: with two of them a FLUX 3 klein step took 4–8× longer), load against attached images (2 references added ≈ 7 s), decode against output size. New stages: the slower first step of a run and the worker's exit after the last image, which the estimate left out (it was usually short by 5–15 s). After the first step the run's own speed replaces history, and recent runs weigh more. Load time is no longer counted while waiting for a previous job.
+
 ## 1.2.0 — 2026-11-16
 
 - Catalog: newest models first, by the release date of the original repo.

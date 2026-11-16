@@ -16,10 +16,15 @@ struct StudioInspector: View {
             SwiftUI.Section {
                 AspectPicker(selection: $studio.settings.aspect, hasSource: studio.initImage != nil)
                 VStack(alignment: .leading, spacing: 6) {
-                    LabelWithInfo("Качество", info: "Разрешение итогового изображения. Черновик ≈ 0.4 МП — для быстрых проб, Стандарт ≈ 1 МП — родное разрешение большинства моделей, Высокое и Максимум — больше деталей, но больше времени и памяти (расход растёт пропорционально площади).")
+                    let limit = studio.resolutionLimit
+                    LabelWithInfo("Качество", info: "Разрешение итогового изображения в пределах того, на что рассчитана модель. Черновик ≈ 0.4 МП — для быстрых проб, Стандарт ≈ 1 МП — родное разрешение большинства моделей. Максимум — предел самой модели (у одних 1 МП, у других 2K или 4K), Высокое — посередине. Больше разрешение — больше деталей, но больше времени и памяти.")
                     // Not a segmented Picker: NSSegmentedControl makes every segment as wide as «Максимум»
                     // (~364 pt in all) and can't shrink, so it overflowed the 380 pt panel.
-                    FittingSegments(selection: $studio.settings.quality, options: Quality.allCases) { $0.title }
+                    FittingSegments(
+                        selection: Binding(get: { studio.settings.quality.available(limit: limit) },
+                                           set: { studio.settings.quality = $0 }),
+                        options: Quality.options(limit: limit)
+                    ) { $0.title(limit: limit) }
                     let size = studio.dimensions
                     Text("\(size.width) × \(size.height) · \(String(format: "%.1f", studio.megapixels)) МП")
                         .font(.caption)
