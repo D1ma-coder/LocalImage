@@ -61,7 +61,7 @@ private struct ModelSwitcher: View {
             }
             ForEach(store.readyModels) { model in
                 Button {
-                    studio.settings.modelID = model.id
+                    studio.selectModel(model.id)
                 } label: {
                     if model.id == studio.selectedModelID {
                         Image(systemName: "checkmark")

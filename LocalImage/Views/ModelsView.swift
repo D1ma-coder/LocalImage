@@ -188,7 +188,7 @@ private struct InstalledRow: View {
             Menu {
                 if model.isReady {
                     Button("Использовать в студии") {
-                        studio.settings.modelID = model.id
+                        studio.selectModel(model.id)
                         app.section = .studio
                     }
                 }

@@ -30,8 +30,13 @@ final class Studio {
 
     var settings = GenerationSettings.load() {
         didSet {
-            if settings != oldValue { settings.save() }
             if settings.modelID != selectedModelID { selectedModelID = settings.modelID }
+            if settings.modelID != oldValue.modelID, dropsInitImage {
+                settings.initImagePath = nil
+                if settings.aspect == .source { settings.aspect = .square }
+                initImage = nil
+            }
+            if settings != oldValue { settings.save() }
         }
     }
     /// Separate observed copy of `settings.modelID`, so views that only care about the model
@@ -250,6 +255,15 @@ final class Studio {
     }
 
     func clearError() { lastError = nil }
+
+    /// A model without img2img can't use a source image.
+    private var dropsInitImage: Bool { settings.initImagePath != nil && caps.map { !$0.img2img } == true }
+
+    /// Picks a model by hand; a source image the model can't use is removed, even when it is already selected.
+    func selectModel(_ id: String) {
+        settings.modelID = id
+        if dropsInitImage { setInitImage(nil) }
+    }
 
     // MARK: Init image
 
