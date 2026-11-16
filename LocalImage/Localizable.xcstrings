@@ -36,7 +36,14 @@
       }
     },
     "%@ ГБ" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ GB"
+          }
+        }
+      }
     },
     "%@ из %@" : {
       "localizations" : {
@@ -973,7 +980,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Log of the last generation"
+            "value" : "Last generation log"
           }
         }
       }

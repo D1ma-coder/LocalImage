@@ -19,7 +19,7 @@ You can download any compatible model from Hugging Face inside the app, choose h
 
 Every step shows an estimate of the finished image (x̂₀), not raw noise, so the composition is visible from the first step. The canvas stays slightly blurred under a loader until the image is final; a batch gets all its slots up front.
 
-![Live preview while a batch of three images is being generated](docs/assets/live-preview.png)
+![Live preview while a batch of three images is being generated](docs/assets/en/live-preview.png)
 
 All images are saved to `~/Pictures/LocalImage/YYYY-MM-DD/` with a `.lix.json` file next to each one. The gallery searches by prompt and repeats any image with the same or a new seed.
 
@@ -58,12 +58,12 @@ To start from an existing picture, drag it onto the canvas or press **+** next t
 - **Original weights with your own quantization.** The text/VL encoder and the diffusion model are quantized separately. The app suggests the best combinations for the memory of your Mac.
 - **Downloads** resume over HTTP Range after network errors and app restarts, one file at a time. Only the needed weights are downloaded; duplicate single-file checkpoints and repository images are skipped.
 
-![Model catalog with descriptions, licenses and statistics from Hugging Face](docs/assets/catalog.png)
+![Model catalog with descriptions, licenses and statistics from Hugging Face](docs/assets/en/catalog.png)
 
 <details>
 <summary>Hugging Face search</summary>
 
-![Hugging Face search with filters and badges](docs/assets/hub.png)
+![Hugging Face search with filters and badges](docs/assets/en/hub.png)
 
 </details>
 
